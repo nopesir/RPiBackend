@@ -2,7 +2,7 @@ import gatt
 
 
 class ESP32BLEManager(gatt.DeviceManager):
-    hashmac = {}
+    hashmac = dict()
     devices = list()
     i = 0
     j = 0

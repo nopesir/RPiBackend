@@ -1,6 +1,7 @@
 from flask import Flask
 from flask import json
 from flask import request
+from flask import jsonify
 import subprocess
 import re
 import gatt
@@ -23,7 +24,14 @@ def connect():
     macs = manager.hashmac
     
     if(not macs):
-      return "no devices"
+        message = {
+            'status': 200,
+            'message': 'OK',
+            'ESPs': 'null'
+        }
+        resp = jsonify(message)
+        resp.status_code = 200
+        return resp
     
     ip_address = ([l for l in ([ip for ip in socket.gethostbyname_ex(socket.gethostname())[2]
                                 if not ip.startswith("127.")][:1], [[(s.connect(('8.8.8.8', 53)),
@@ -40,5 +48,16 @@ def connect():
         device.disconnect()
         print("------------------------------")
     
-    n_of_devices = len(macs)
-    names = macs.values()
+    
+    message = {
+        'status': 200,
+        'message': 'OK',
+        'ESPs': macs
+    }
+    resp = jsonify(message)
+    resp.status_code = 200
+    return resp
+
+
+if __name__ == "__main__":
+    app.run(host='127.0.0.1')
