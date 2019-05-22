@@ -48,6 +48,16 @@ def set_new_network_wpa(ssid, password=''):
 
 
 
+def internet(host="8.8.8.8", port=53, timeout=3):
+
+    try:
+        socket.setdefaulttimeout(timeout)
+        socket.socket(socket.AF_INET, socket.SOCK_STREAM).connect((host, port))
+        return True
+    except Exception as ex:
+        return False
+
+
 app = Flask(__name__)
 
 @app.route("/connect", methods=['GET'])
@@ -67,7 +77,8 @@ def connect():
         message = {
             'status': 200,
             'message': 'OK',
-            'ESPs': 'null'
+            'ESPs': 'null',
+            'Connected': internet()
         }
         resp = jsonify(message)
         resp.status_code = 200
@@ -92,7 +103,8 @@ def connect():
     message = {
         'status': 200,
         'message': 'OK',
-        'ESPs': macs
+        'ESPs': macs,
+        'Connected': internet()
     }
     resp = jsonify(message)
     resp.status_code = 200
