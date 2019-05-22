@@ -42,6 +42,9 @@ def set_new_network_wpa(ssid, password=''):
             f.write('    priority=1\n')
             f.write('}\n')
             f.close()
+            bashCommand = "wpa_cli -i wlan0 reconfigure"
+            #process = subprocess.Popen(bashCommand.split(), stdout=subprocess.PIPE)
+            #output, error = process.communicate()
 
 
 
