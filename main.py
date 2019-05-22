@@ -2,6 +2,7 @@ from flask import Flask
 from flask import json
 from flask import request
 from flask import jsonify
+import wifi
 import subprocess
 import re
 import gatt
@@ -9,6 +10,40 @@ import time
 import socket
 from ESP32BLE import ESP32BLE
 from ESP32BLE import ESP32BLEManager
+import paho.mqtt.client as mqtt
+
+def on_connect(mqtt_client, obj, flags, rc):
+    mqtt_client.subscribe("+/event/state")
+    print(" * MQTT Subscribed!")
+
+def on_message(mqtt_client, obj, msg):
+    print("on_message()")
+
+
+mqtt_client = mqtt.Client()
+mqtt_client.on_connect = on_connect
+mqtt_client.on_message = on_message
+mqtt_client.connect("localhost",1883)
+mqtt_client.loop_start()
+
+def set_new_network_wpa(ssid, password=''):
+    with open('/etc/wpa_supplicant/wpa_supplicant.conf','w') as f:
+            f.write('ctrl_interface=DIR=/var/run/wpa_supplicant GROUP=netdev\n')
+            f.write('update_config=1\n')
+            f.write('country=IT\n')
+            f.write('\n')
+            f.write('network={\n')
+            f.write('    ssid="%s"\n' % ssid)
+            if not password:
+                f.write('    key_mgmt=NONE\n')
+            else:
+                f.write('    psk="%s"\n' % password)
+                f.write('    key_mgmt=WPA-PSK\n')
+            f.write('    priority=1\n')
+            f.write('}\n')
+            f.close()
+
+
 
 app = Flask(__name__)
 
@@ -22,6 +57,8 @@ def connect():
     manager.run()
     manager.stop_discovery()
     macs = manager.hashmac
+
+    set_new_network_wpa(ssid=ssid, password=passwd)
     
     if(not macs):
         message = {
@@ -56,8 +93,12 @@ def connect():
     }
     resp = jsonify(message)
     resp.status_code = 200
+
+    
+
     return resp
 
 
 if __name__ == "__main__":
     app.run(host='127.0.0.1')
+    
