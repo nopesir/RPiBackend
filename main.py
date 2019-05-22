@@ -34,7 +34,7 @@ def set_new_network_wpa(ssid, password=''):
             f.write('\n')
             f.write('network={\n')
             f.write('    ssid="%s"\n' % ssid)
-            if not password:
+            if password:
                 f.write('    key_mgmt=NONE\n')
             else:
                 f.write('    psk="%s"\n' % password)
