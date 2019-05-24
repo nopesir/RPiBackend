@@ -1,4 +1,5 @@
 #!/bin/bash
+# DISABLE wlan0 IN dhcpcd.conf
 
 echo "Stoping $netInterface"
 ifconfig wlan0 down
