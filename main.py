@@ -7,7 +7,6 @@ import time
 import wifi
 import subprocess
 import re
-import gatt
 import time
 import socket
 from ESP32BLE import ESP32BLE
