@@ -161,7 +161,7 @@ def connect():
 
 
 @app.route("/toap")
-def tosta():
+def toap():
     set_ap();
     return "Ciaone";
 
