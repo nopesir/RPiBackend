@@ -46,7 +46,7 @@ def check_wifi(sc):
 
 
 s.enter(2, 1, check_wifi, (s,))
-s.run()
+s.run(False)
 
 
 def set_new_network_wpa(ssid, password=''):
