@@ -11,4 +11,5 @@ echo "Reconnecting"
 wpa_supplicant -B -i wlan0 -c /etc/wpa_supplicant/wpa_supplicant.conf
 echo "Renewing IP Address for $netInterface"
 /sbin/dhcpcd
+ifconfig wlan0 up
 wpa_cli select network 0
