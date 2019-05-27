@@ -71,7 +71,7 @@ def set_new_network_wpa(ssid, password=''):
 
 
 def set_sta():
-    with open('/etc/wpa_supplicant/wpa_supplicant.conf', 'w') as f:
+    with open('/etc/dhcpcd.conf', 'w') as f:
         f.write('hostname\n\n')
         f.write('clientid\n\n')
         f.write('persistent\n\n')
