@@ -13,6 +13,12 @@ from ESP32BLE import ESP32BLE
 from ESP32BLE import ESP32BLEManager
 import paho.mqtt.client as mqtt
 
+message = {
+        'status': 200,
+        'message': 'OK',
+        'ip': "127.0.0.1",
+        'connected': False
+    }
 
 def on_connect(mqtt_client, obj, flags, rc):
     mqtt_client.subscribe("+/event/state")
@@ -127,6 +133,12 @@ def check_wifi():
     else:
         return True
 
+def retrieve_ip():
+    return ([l for l in ([ip for ip in socket.gethostbyname_ex(socket.gethostname())[2]
+                                if not ip.startswith("127.")][:1], [[(s.connect(('8.8.8.8', 53)),
+                                                                      s.getsockname()[0], s.close()) for s in [socket.socket(socket.AF_INET,
+                                                                                                                             socket.SOCK_DGRAM)]][0][1]]) if l][0][0])
+
 
 app = Flask(__name__)
 
@@ -139,22 +151,21 @@ def connect():
     set_new_network_wpa(ssid=ssid, password=passwd)
 
     time.sleep(4.0)
-
-    ip_address = ([l for l in ([ip for ip in socket.gethostbyname_ex(socket.gethostname())[2]
-                                if not ip.startswith("127.")][:1], [[(s.connect(('8.8.8.8', 53)),
-                                                                      s.getsockname()[0], s.close()) for s in [socket.socket(socket.AF_INET,
-                                                                                                                             socket.SOCK_DGRAM)]][0][1]]) if l][0][0])
-
-    message = {
-        'status': 200,
-        'message': 'OK',
-        'IP': ip_address,
-        'Connected': internet()
-    }
+    
+    message['ip'] = retrieve_ip()
+    message['connected'] = internet()
+    
     resp = jsonify(message)
     resp.status_code = 200
     return resp
 
 
+@app.route("/toap")
+def tosta():
+    set_ap();
+    return "Ciaone";
+
+
 if __name__ == "__main__":
     app.run(host='127.0.0.1')
+
