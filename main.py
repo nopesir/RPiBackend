@@ -165,6 +165,11 @@ def tosta():
     set_ap();
     return "Ciaone";
 
+@app.route("/tosta")
+def tosta():
+    set_sta();
+    return "Ciaone2";
+
 
 if __name__ == "__main__":
     app.run(host='127.0.0.1')
