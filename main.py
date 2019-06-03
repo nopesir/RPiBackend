@@ -46,7 +46,7 @@ def check_wifi(sc):
 
 
 s.enter(2, 1, check_wifi, (s,))
-s.run(False)
+
 
 
 def set_new_network_wpa(ssid, password=''):
@@ -150,10 +150,12 @@ def connect():
 
     set_new_network_wpa(ssid=ssid, password=passwd)
 
-    time.sleep(4.0)
+    time.sleep(7.0)
     
     message['ip'] = retrieve_ip()
     message['connected'] = internet()
+
+
     
     resp = jsonify(message)
     resp.status_code = 200
