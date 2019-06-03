@@ -155,6 +155,10 @@ def connect():
     message['ip'] = retrieve_ip()
     message['connected'] = internet()
 
+    out = subprocess.check_output(["nmcli", "-f", "SSID", "dev", "wifi"])
+    out = re.sub('[ ]{2,}\\n', '~', out.decode('utf-8'))
+    lst = out.split('~')
+    lst = [k for k in lst if 'Mongoose_' in k]
 
     
     resp = jsonify(message)
