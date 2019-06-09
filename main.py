@@ -152,21 +152,17 @@ def connect():
 
 
 def check_wifi():
-    
-    out = subprocess.check_output(["iwconfig", "wlp2s0"])
-    out2 = subprocess.check_output(["sudo", "iwgetid", "-r"])
-    if "Not-Associated" in out.decode('utf-8'):
-        print("chiamata1")
-        wificheck['online'] = False
-        wificheck['ssid'] = "none"
-        wificheck['ip'] = "none"
-    else:
-        print("chiamata2")
+    #out = subprocess.check_output(["iwconfig", "wlp2s0"])
+    try:
+        out2 = subprocess.check_output(["sudo", "iwgetid", "-r"])
         wificheck['online'] = True
         wificheck['ssid'] = re.sub('\\n', '', out2.decode('utf-8'))
         wificheck['ip'] = retrieve_ip()
+    except subprocess.CalledProcessError as e:
+        wificheck['online'] = False
+        wificheck['ssid'] = "none"
+        wificheck['ip'] = "none"
 
-    return
 
 
 
