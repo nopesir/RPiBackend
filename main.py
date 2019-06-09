@@ -9,44 +9,37 @@ import subprocess
 import re
 import time
 import socket
-from ESP32BLE import ESP32BLE
-from ESP32BLE import ESP32BLEManager
+#from ESP32BLE import ESP32BLE
+#from ESP32BLE import ESP32BLEManager
 import paho.mqtt.client as mqtt
 
 message = {
-        'status': 200,
-        'message': 'OK',
-        'ip': "127.0.0.1",
-        'connected': False
-    }
+    'status': 200,
+    'message': 'OK',
+    'ip': "127.0.0.1",
+    'connected': False
+}
 
-def on_connect(mqtt_client, obj, flags, rc):
-    mqtt_client.subscribe("+/event/state")
-    print(" * MQTT Subscribed!")
-
-
-def on_message(mqtt_client, obj, msg):
-    print("on_message()")
+wificheck = {
+    'ssid': "ssid",
+    'online': False,
+    'ip': "127.0.0.1"
+}
 
 
-mqtt_client = mqtt.Client()
-mqtt_client.on_connect = on_connect
-mqtt_client.on_message = on_message
-mqtt_client.connect("localhost", 1883)
-mqtt_client.loop_start()
+
 s = sched.scheduler(time.time, time.sleep)
 
 
-def check_wifi(sc):
-    out = subprocess.check_output(["iwconfig", "wlan0"])
+def check_wifi1(sc):
+    out = subprocess.check_output(["iwconfig", "wlp2s0"])
     if "Not-Associated" in out.decode('utf-8'):
         set_ap()
         return
-    s.enter(2, 1, check_wifi, (sc,))
+    s.enter(2, 1, check_wifi1, (sc,))
 
 
-s.enter(2, 1, check_wifi, (s,))
-
+s.enter(2, 1, check_wifi1, (s,))
 
 
 def set_new_network_wpa(ssid, password=''):
@@ -89,9 +82,6 @@ def set_sta():
         f.close()
         time.sleep(1.0)
         subprocess.run("./toSTA.sh", shell=True, check=True)
-    
-
-
 
 
 def set_ap():
@@ -115,7 +105,6 @@ def set_ap():
         subprocess.run("./toAP.sh", shell=True, check=True)
 
 
-
 def internet(host="8.8.8.8", port=53, timeout=3):
 
     try:
@@ -126,32 +115,25 @@ def internet(host="8.8.8.8", port=53, timeout=3):
         return False
 
 
-def check_wifi():
-    out = subprocess.check_output(["iwconfig", "wlan0"])
-    if "Not-Associated" in out:
-        return False
-    else:
-        return True
-
 def retrieve_ip():
     return ([l for l in ([ip for ip in socket.gethostbyname_ex(socket.gethostname())[2]
-                                if not ip.startswith("127.")][:1], [[(s.connect(('8.8.8.8', 53)),
-                                                                      s.getsockname()[0], s.close()) for s in [socket.socket(socket.AF_INET,
-                                                                                                                             socket.SOCK_DGRAM)]][0][1]]) if l][0][0])
+                          if not ip.startswith("127.")][:1], [[(s.connect(('8.8.8.8', 53)),
+                                                                s.getsockname()[0], s.close()) for s in [socket.socket(socket.AF_INET,
+                                                                                                                       socket.SOCK_DGRAM)]][0][1]]) if l][0][0])
 
 
-app = Flask(__name__)
+#app = Flask(__name__)
 
 
-@app.route("/connect", methods=['GET'])
+# @app.route("/connect", methods=['GET'])
 def connect():
     ssid = request.args.get('ssid')
     passwd = request.args.get('passwd')
 
-    set_new_network_wpa(ssid=ssid, password=passwd)
+    #set_new_network_wpa(ssid=ssid, password=passwd)
 
-    time.sleep(7.0)
-    
+    time.sleep(10.0)
+
     message['ip'] = retrieve_ip()
     message['connected'] = internet()
 
@@ -160,23 +142,54 @@ def connect():
     lst = out.split('~')
     lst = [k for k in lst if 'Mongoose_' in k]
 
-    
+    for x in lst:
+        #set_new_network_wpa(ssid=x, password="Mongoose")
+        time.sleep(10.0)
+
     resp = jsonify(message)
     resp.status_code = 200
     return resp
 
 
-@app.route("/toap")
-def toap():
-    set_ap();
-    return "Ciaone";
+def check_wifi():
+    
+    out = subprocess.check_output(["iwconfig", "wlp2s0"])
+    out2 = subprocess.check_output(["sudo", "iwgetid", "-r"])
+    if "Not-Associated" in out.decode('utf-8'):
+        print("chiamata1")
+        wificheck['online'] = False
+        wificheck['ssid'] = "none"
+        wificheck['ip'] = "none"
+    else:
+        print("chiamata2")
+        wificheck['online'] = True
+        wificheck['ssid'] = re.sub('\\n', '', out2.decode('utf-8'))
+        wificheck['ip'] = retrieve_ip()
 
-@app.route("/tosta")
-def tosta():
-    set_sta();
-    return "Ciaone2";
+    return
 
 
-if __name__ == "__main__":
-    app.run(host='127.0.0.1')
 
+def on_connect(mqtt_client, obj, flags, rc):
+    mqtt_client.subscribe("local/rpi/event/+")
+    print(" * MQTT Subscribed!")
+
+
+def on_message(mqtt_client, obj, msg):
+    if str(msg.topic) == "local/rpi/event/check_wifi":
+        if msg.payload == b'rabarbaro':
+            check_wifi()
+            mqtt_client.publish("local/rpi/event/check_wifi/return", json.dumps(wificheck))
+
+
+
+mqtt_client = mqtt.Client()
+mqtt_client.on_connect = on_connect
+mqtt_client.on_message = on_message
+mqtt_client.connect("localhost", 1882)
+
+
+
+mqtt_client.loop_forever()
+# if __name__ == "__main__":
+#    app.run(host='127.0.0.1')
