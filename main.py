@@ -156,7 +156,7 @@ def connect():
     print("WIFI CONNECTED")
     ssids = []
     # sudo iwlist wlan0 scan | grep Mongoose_
-    out = subprocess.check_output(["sudo", "iwlist", "wlan0", "scan", "|", "grep", "Mongoose_"])
+    out = subprocess.check_output(["sudo", "iwlist", "wlan0", "scan"])
     out = out.decode('utf-8')
     lines = out.split('\n')
     for line in lines:
@@ -164,6 +164,8 @@ def connect():
         if m:
             ssids.append(m.group(1))
 
+
+    ssids = [k for k in ssids if 'Mongoose_' in k]
     data['config']['wifi']['sta']['ssid'] = ssid
     data['config']['wifi']['sta']['pass'] = passwd
     data['config']['mqtt']['enable'] = passwd
