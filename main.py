@@ -172,7 +172,11 @@ def connect():
         time.sleep(3)
         r2 = requests.post('http://192.168.4.1/rpc/Config.Save', json={'reboot': True})
         
+    
+    set_new_network_wpa(ssid=ssid, password=passwd)
 
+    while not check_wifi():
+        pass
     resp = jsonify(ssids)
     resp.status_code = 200
     return resp
