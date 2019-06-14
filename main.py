@@ -129,6 +129,7 @@ app = Flask(__name__)
 def check_wifi():
     res = False
     try:
+        print("MANNAGGIA")
         out2 = subprocess.check_output(["sudo", "iwgetid", "-r"])
         wificheck['online'] = True
         wificheck['ssid'] = re.sub('\\n', '', out2.decode('utf-8'))
@@ -136,6 +137,7 @@ def check_wifi():
         res = True
 
     except subprocess.CalledProcessError as e:
+        print("BUBBA")
         wificheck['online'] = False
         wificheck['ssid'] = "none"
         wificheck['ip'] = "none"
