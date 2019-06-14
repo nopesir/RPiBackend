@@ -7,6 +7,7 @@ import time
 import wifi
 import subprocess
 import re
+import requests
 import time
 import socket
 #from ESP32BLE import ESP32BLE
@@ -27,19 +28,18 @@ wificheck = {
 }
 
 
+data = {
+    'config': {
+        'wifi': {
+            'sta': {'enable': True, 'ssid': "ssid", 'pass': "pass"},
+            'ap': {'enable': False}
+        },
+        'mqtt': {'enable': True, 'server': "127.0.0.1"}
+    }
+}
+
 
 s = sched.scheduler(time.time, time.sleep)
-
-
-def check_wifi1(sc):
-    out = subprocess.check_output(["iwconfig", "wlp2s0"])
-    if "Not-Associated" in out.decode('utf-8'):
-        set_ap()
-        return
-    s.enter(2, 1, check_wifi1, (sc,))
-
-
-s.enter(2, 1, check_wifi1, (s,))
 
 
 def set_new_network_wpa(ssid, password=''):
@@ -122,48 +122,60 @@ def retrieve_ip():
                                                                                                                        socket.SOCK_DGRAM)]][0][1]]) if l][0][0])
 
 
-#app = Flask(__name__)
-
-
-# @app.route("/connect", methods=['GET'])
-def connect():
-    ssid = request.args.get('ssid')
-    passwd = request.args.get('passwd')
-
-    #set_new_network_wpa(ssid=ssid, password=passwd)
-
-    time.sleep(10.0)
-
-    message['ip'] = retrieve_ip()
-    message['connected'] = internet()
-
-    out = subprocess.check_output(["nmcli", "-f", "SSID", "dev", "wifi"])
-    out = re.sub('[ ]{2,}\\n', '~', out.decode('utf-8'))
-    lst = out.split('~')
-    lst = [k for k in lst if 'Mongoose_' in k]
-
-    for x in lst:
-        #set_new_network_wpa(ssid=x, password="Mongoose")
-        time.sleep(10.0)
-
-    resp = jsonify(message)
-    resp.status_code = 200
-    return resp
+app = Flask(__name__)
 
 
 def check_wifi():
-    #out = subprocess.check_output(["iwconfig", "wlp2s0"])
+    res = False
     try:
         out2 = subprocess.check_output(["sudo", "iwgetid", "-r"])
         wificheck['online'] = True
         wificheck['ssid'] = re.sub('\\n', '', out2.decode('utf-8'))
         wificheck['ip'] = retrieve_ip()
+        res = True
+
     except subprocess.CalledProcessError as e:
         wificheck['online'] = False
         wificheck['ssid'] = "none"
         wificheck['ip'] = "none"
+        res = False
+
+    return res
 
 
+@app.route("/connect", methods=['GET'])
+def connect():
+    ssid = request.args.get('ssid')
+    passwd = request.args.get('passwd')
+
+    set_new_network_wpa(ssid=ssid, password=passwd)
+
+    while not check_wifi():
+        pass
+    print("WIFI CONNECTED")
+    out = subprocess.check_output(["nmcli", "-f", "SSID", "dev", "wifi"])
+    out = re.sub('[ ]{2,}\\n', '~', out.decode('utf-8'))
+    lst = out.split('~')
+    lst = [k for k in lst if 'Mongoose_' in k]
+
+    data['config']['wifi']['sta']['ssid'] = ssid
+    data['config']['wifi']['sta']['pass'] = passwd
+    data['config']['mqtt']['enable'] = passwd
+    data['config']['mqtt']['server'] = wificheck['ip']
+
+    for x in lst:
+        set_new_network_wpa(ssid=x, password="Mongoose")
+        while not check_wifi():
+            pass
+        print("CONNECTED TO " + x)
+        r = requests.post('http://192.168.4.1/rpc/Config.Set', json=data)
+        time.sleep(3)
+        r2 = requests.post('http://192.168.4.1//rpc/Config.Save', json={'reboot': True})
+        
+
+    resp = jsonify(message)
+    resp.status_code = 200
+    return resp
 
 
 def on_connect(mqtt_client, obj, flags, rc):
@@ -172,11 +184,7 @@ def on_connect(mqtt_client, obj, flags, rc):
 
 
 def on_message(mqtt_client, obj, msg):
-    if str(msg.topic) == "local/rpi/event/check_wifi":
-        if msg.payload == b'rabarbaro':
-            check_wifi()
-            mqtt_client.publish("local/rpi/event/check_wifi/return", json.dumps(wificheck))
-
+    return
 
 
 mqtt_client = mqtt.Client()
@@ -185,7 +193,6 @@ mqtt_client.on_message = on_message
 mqtt_client.connect("localhost", 1882)
 
 
-
-mqtt_client.loop_forever()
-# if __name__ == "__main__":
-#    app.run(host='127.0.0.1')
+mqtt_client.loop_start()
+if __name__ == "__main__":
+    app.run(host='127.0.0.1')
