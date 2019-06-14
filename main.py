@@ -59,7 +59,7 @@ def set_new_network_wpa(ssid, password=''):
         f.write('    priority=1\n')
         f.write('}\n')
         f.close()
-        bashCommand = "wpa_cli -i wlan0 reconfigure"
+        bashCommand = "sudo wpa_cli -i wlan0 reconfigure"
         process = subprocess.Popen(bashCommand.split(), stdout=subprocess.PIPE)
         output, error = process.communicate()
 
@@ -149,18 +149,19 @@ def connect():
     ssid = request.args.get('ssid')
     passwd = request.args.get('passwd')
 
-    set_new_network_wpa(ssid=ssid, password=passwd)
+    #set_new_network_wpa(ssid=ssid, password=passwd)
 
     while not check_wifi():
         pass
 
     print("WIFI CONNECTED")
-    print(getSSID.main())
+    ssids = [x for x in getSSID.main() if "Mongoose_" in x['Name']]
+    #print(getSSID.main()['Name']
 
-    #data['config']['wifi']['sta']['ssid'] = ssid
-    #data['config']['wifi']['sta']['pass'] = passwd
-    #data['config']['mqtt']['enable'] = passwd
-    #data['config']['mqtt']['server'] = wificheck['ip']
+    data['config']['wifi']['sta']['ssid'] = ssid
+    data['config']['wifi']['sta']['pass'] = passwd
+    data['config']['mqtt']['enable'] = passwd
+    data['config']['mqtt']['server'] = wificheck['ip']
 
     #for x in ssids:
     #    set_new_network_wpa(ssid=x, password="Mongoose")
@@ -172,7 +173,7 @@ def connect():
     #    r2 = requests.post('http://192.168.4.1//rpc/Config.Save', json={'reboot': True})
         
 
-    resp = jsonify(message)
+    resp = jsonify(ssids)
     resp.status_code = 200
     return resp
 

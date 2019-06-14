@@ -1,7 +1,7 @@
 import sys
 import subprocess
 
-interface = "wlan0"
+interface = "wlp2s0"
 
 # You can add or change the functions to parse the properties of each AP (cell)
 # below. They take one argument, the bunch of text describing one cell in iwlist
@@ -53,13 +53,6 @@ rules={"Name":get_name,
        "Signal":get_signal_level
        }
 
-# Here you can choose the way of sorting the table. sortby should be a key of
-# the dictionary rules.
-
-def sort_cells(cells):
-    sortby = "Quality"
-    reverse = True
-    cells.sort(None, lambda el:el[sortby], reverse)
 
 # You can choose which columns to display here, and most importantly in what order. Of
 # course, they must exist as keys in the dict rules.
@@ -144,6 +137,5 @@ def main():
     for cell in cells:
         parsed_cells.append(parse_cell(cell))
 
-    sort_cells(parsed_cells)
 
     return parsed_cells
