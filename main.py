@@ -10,6 +10,7 @@ import re
 import requests
 import time
 import socket
+import getSSID
 #from ESP32BLE import ESP32BLE
 #from ESP32BLE import ESP32BLEManager
 import paho.mqtt.client as mqtt
@@ -154,31 +155,21 @@ def connect():
         pass
 
     print("WIFI CONNECTED")
-    ssids = []
-    # sudo iwlist wlan0 scan | grep Mongoose_
-    out = subprocess.check_output(["sudo", "iwlist", "wlan0", "scan"])
-    out = out.decode('utf-8')
-    lines = out.split('\n')
-    for line in lines:
-        m = re.search('"(.+?)"', line)
-        if m:
-            ssids.append(m.group(1))
+    print(getSSID.main())
 
+    #data['config']['wifi']['sta']['ssid'] = ssid
+    #data['config']['wifi']['sta']['pass'] = passwd
+    #data['config']['mqtt']['enable'] = passwd
+    #data['config']['mqtt']['server'] = wificheck['ip']
 
-    ssids = [k for k in ssids if 'Mongoose_' in k]
-    data['config']['wifi']['sta']['ssid'] = ssid
-    data['config']['wifi']['sta']['pass'] = passwd
-    data['config']['mqtt']['enable'] = passwd
-    data['config']['mqtt']['server'] = wificheck['ip']
-
-    for x in ssids:
-        set_new_network_wpa(ssid=x, password="Mongoose")
-        while not check_wifi():
-            pass
-        print("CONNECTED TO " + x)
-        r = requests.post('http://192.168.4.1/rpc/Config.Set', json=data)
-        time.sleep(3)
-        r2 = requests.post('http://192.168.4.1//rpc/Config.Save', json={'reboot': True})
+    #for x in ssids:
+    #    set_new_network_wpa(ssid=x, password="Mongoose")
+    #    while not check_wifi():
+    #        pass
+    #    print("CONNECTED TO " + x)
+    #    r = requests.post('http://192.168.4.1/rpc/Config.Set', json=data)
+    #    time.sleep(3)
+    #    r2 = requests.post('http://192.168.4.1//rpc/Config.Save', json={'reboot': True})
         
 
     resp = jsonify(message)
