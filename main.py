@@ -149,7 +149,7 @@ def connect():
     ssid = request.args.get('ssid')
     passwd = request.args.get('passwd')
 
-    #set_new_network_wpa(ssid=ssid, password=passwd)
+    set_new_network_wpa(ssid=ssid, password=passwd)
 
     while not check_wifi():
         pass
@@ -163,14 +163,14 @@ def connect():
     data['config']['mqtt']['enable'] = passwd
     data['config']['mqtt']['server'] = wificheck['ip']
 
-    #for x in ssids:
-    #    set_new_network_wpa(ssid=x, password="Mongoose")
-    #    while not check_wifi():
-    #        pass
-    #    print("CONNECTED TO " + x)
-    #    r = requests.post('http://192.168.4.1/rpc/Config.Set', json=data)
-    #    time.sleep(3)
-    #    r2 = requests.post('http://192.168.4.1//rpc/Config.Save', json={'reboot': True})
+    for x in ssids:
+        set_new_network_wpa(ssid=x, password="Mongoose")
+        while not check_wifi():
+            pass
+        print("CONNECTED TO " + x)
+        r = requests.post('http://192.168.4.1/rpc/Config.Set', json=data)
+        time.sleep(3)
+        r2 = requests.post('http://192.168.4.1//rpc/Config.Save', json={'reboot': True})
         
 
     resp = jsonify(ssids)
