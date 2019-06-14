@@ -160,8 +160,7 @@ def connect():
 
     data['config']['wifi']['sta']['ssid'] = ssid
     data['config']['wifi']['sta']['pass'] = passwd
-    data['config']['mqtt']['enable'] = passwd
-    data['config']['mqtt']['server'] = wificheck['ip']
+    data['config']['mqtt']['server'] = retrieve_ip()
 
     for x in ssids:
         set_new_network_wpa(ssid=x['Name'], password="Mongoose")
