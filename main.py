@@ -61,7 +61,7 @@ def set_new_network_wpa(ssid, password):
         f.close()
         bashCommand = "sudo wpa_cli -i wlan0 reconfigure"
         process = subprocess.Popen(bashCommand.split(), stdout=subprocess.PIPE)
-        subprocess.run("./toSTA.sh", shell=True, check=True)
+        subprocess.run("sudo ./toSTA.sh", shell=True, check=True)
 
 
 def set_sta():
