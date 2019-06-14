@@ -152,18 +152,24 @@ def connect():
 
     while not check_wifi():
         pass
+
     print("WIFI CONNECTED")
-    out = subprocess.check_output(["nmcli", "-f", "SSID", "dev", "wifi"])
-    out = re.sub('[ ]{2,}\\n', '~', out.decode('utf-8'))
-    lst = out.split('~')
-    lst = [k for k in lst if 'Mongoose_' in k]
+    ssids = []
+    # sudo iwlist wlan0 scan | grep Mongoose_
+    out = subprocess.check_output(["sudo", "iwlist", "wlan0", "scan", "|", "grep", "Mongoose_"])
+    out = out.decode('utf-8')
+    lines = out.split('\n')
+    for line in lines:
+        m = re.search('"(.+?)"', line)
+        if m:
+            ssids.append(m.group(1))
 
     data['config']['wifi']['sta']['ssid'] = ssid
     data['config']['wifi']['sta']['pass'] = passwd
     data['config']['mqtt']['enable'] = passwd
     data['config']['mqtt']['server'] = wificheck['ip']
 
-    for x in lst:
+    for x in ssids:
         set_new_network_wpa(ssid=x, password="Mongoose")
         while not check_wifi():
             pass
