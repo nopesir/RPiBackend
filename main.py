@@ -170,7 +170,7 @@ def connect():
         print("CONNECTED TO " + x['Name'])
         r = requests.post('http://192.168.4.1/rpc/Config.Set', json=data)
         time.sleep(3)
-        r2 = requests.post('http://192.168.4.1//rpc/Config.Save', json={'reboot': True})
+        r2 = requests.post('http://192.168.4.1/rpc/Config.Save', json={'reboot': True})
         
 
     resp = jsonify(ssids)
