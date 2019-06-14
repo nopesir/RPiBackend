@@ -129,7 +129,6 @@ app = Flask(__name__)
 def check_wifi():
     res = False
     try:
-        print("MANNAGGIA")
         out2 = subprocess.check_output(["sudo", "iwgetid", "-r"])
         wificheck['online'] = True
         wificheck['ssid'] = re.sub('\\n', '', out2.decode('utf-8'))
@@ -137,7 +136,6 @@ def check_wifi():
         res = True
 
     except subprocess.CalledProcessError as e:
-        print("BUBBA")
         wificheck['online'] = False
         wificheck['ssid'] = "none"
         wificheck['ip'] = "none"
@@ -166,10 +164,10 @@ def connect():
     data['config']['mqtt']['server'] = wificheck['ip']
 
     for x in ssids:
-        set_new_network_wpa(ssid=x, password="Mongoose")
+        set_new_network_wpa(ssid=x['Name'], password="Mongoose")
         while not check_wifi():
             pass
-        print("CONNECTED TO " + x)
+        print("CONNECTED TO " + x['Name'])
         r = requests.post('http://192.168.4.1/rpc/Config.Set', json=data)
         time.sleep(3)
         r2 = requests.post('http://192.168.4.1//rpc/Config.Save', json={'reboot': True})
