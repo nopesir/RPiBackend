@@ -43,7 +43,7 @@ data = {
 s = sched.scheduler(time.time, time.sleep)
 
 
-def set_new_network_wpa(ssid, password=''):
+def set_new_network_wpa(ssid, password):
     with open('/etc/wpa_supplicant/wpa_supplicant.conf', 'w') as f:
         f.write('ctrl_interface=DIR=/var/run/wpa_supplicant GROUP=netdev\n')
         f.write('update_config=1\n')
@@ -51,7 +51,7 @@ def set_new_network_wpa(ssid, password=''):
         f.write('\n')
         f.write('network={\n')
         f.write('    ssid="%s"\n' % ssid)
-        if not password:
+        if password == '':
             f.write('    key_mgmt=NONE\n')
         else:
             f.write('    psk="%s"\n' % password)
@@ -156,7 +156,7 @@ def connect():
     while not check_wifi():
         pass
 
-    print("WIFI CONNECTED")
+    print("WIFI CONNECTED with PASSWORD: " + passwd)
     ssids = [x for x in getSSID.main() if "Mongoose_" in x['Name']]
     #print(getSSID.main()['Name']
 
