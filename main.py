@@ -202,12 +202,12 @@ def on_message(mqtt_client, obj, msg):
             esps[str(msg.topic[:15])]['online'] = True
         else:
             esps[str(msg.topic[:15])]['online'] = False
-        shadow['state']['reported'] = esps
-        mqtt_client.publish("local/things/RaspberryPi/shadow/update", json.dumps(shadow))
+        
     else:
         esps[str(msg.topic[:15])] = json.loads(msg.payload)
-        shadow['state']['reported'] = esps
-        mqtt_client.publish("local/things/RaspberryPi/shadow/update", json.dumps(shadow))
+    
+    shadow['state']['reported'] = esps
+    mqtt_client.publish("local/things/RaspberryPi/shadow/update", json.dumps(shadow))
 
 
 mqtt_client = mqtt.Client()
