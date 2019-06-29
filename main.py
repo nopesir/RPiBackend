@@ -29,6 +29,8 @@ wificheck = {
 }
 
 
+
+
 data = {
     'config': {
         'wifi': {
@@ -42,6 +44,13 @@ data = {
 
 s = sched.scheduler(time.time, time.sleep)
 
+shadow = {
+    'state': {
+        'reported': {}
+    }
+}
+
+esps = dict()
 
 def set_new_network_wpa(ssid, password):
     with open('/etc/wpa_supplicant/wpa_supplicant.conf', 'w') as f:
@@ -182,18 +191,29 @@ def connect():
 
 
 def on_connect(mqtt_client, obj, flags, rc):
-    mqtt_client.subscribe("local/rpi/event/+")
+    mqtt_client.subscribe("+/event/state")
+    mqtt_client.subscribe("+/event/status")
     print(" * MQTT Subscribed!")
 
 
 def on_message(mqtt_client, obj, msg):
-    return
+    if(str(msg.topic[-6:]) == "status"):
+        if((msg.payload).decode('utf-8') == "online"):
+            esps[str(msg.topic[:15])]['online'] = True
+        else:
+            esps[str(msg.topic[:15])]['online'] = False
+        shadow['state']['reported'] = esps
+        mqtt_client.publish("local/things/RaspberryPi/shadow/update", json.dumps(shadow))
+    else:
+        esps[str(msg.topic[:15])] = json.loads(msg.payload)
+        shadow['state']['reported'] = esps
+        mqtt_client.publish("local/things/RaspberryPi/shadow/update", json.dumps(shadow))
 
 
 mqtt_client = mqtt.Client()
 mqtt_client.on_connect = on_connect
 mqtt_client.on_message = on_message
-mqtt_client.connect("localhost", 1882)
+mqtt_client.connect("localhost", 1883)
 
 
 mqtt_client.loop_start()
