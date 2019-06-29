@@ -191,8 +191,8 @@ def connect():
 
 
 def on_connect(mqtt_client, obj, flags, rc):
-    mqtt_client.subscribe("+/event/state")
-    mqtt_client.subscribe("+/event/status")
+    mqtt_client.subscribe("+/event/state",1)
+    mqtt_client.subscribe("+/event/status",1)
     print(" * MQTT Subscribed!")
 
 
@@ -207,7 +207,7 @@ def on_message(mqtt_client, obj, msg):
         esps[str(msg.topic[:15])] = json.loads(msg.payload)
     
     shadow['state']['reported'] = esps
-    mqtt_client.publish("local/things/RaspberryPi/shadow/update", json.dumps(shadow))
+    mqtt_client.publish("local/things/RaspberryPi/shadow/update", json.dumps(shadow), qos=1)
 
 
 mqtt_client = mqtt.Client()
