@@ -10,6 +10,9 @@ echo "Attempting to stop dnsmasq"
 echo "Reconnecting"
 wpa_supplicant -B -i wlan0 -c /etc/wpa_supplicant/wpa_supplicant.conf
 echo "Renewing IP Address for $netInterface"
+/etc/init.d/dhcpcd stop
+/etc/init.d/dhcpcd start
 /sbin/dhcpcd
 ifconfig wlan0 up
 wpa_cli select network 0
+
