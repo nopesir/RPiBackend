@@ -159,6 +159,9 @@ def connect():
     ssid = request.args.get('ssid')
     passwd = request.args.get('passwd')
 
+    # Delete shadow AWS
+    mqtt_client.publish("local/things/RaspberryPi/shadow/delete", qos=1)
+
     # Clear all stored messages on MosquittoDB
     subprocess.run("sudo ./clearDB.sh", shell=True, check=True)
     esps = {}
