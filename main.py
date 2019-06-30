@@ -175,9 +175,11 @@ def connect():
 
     for x in ssids:
         set_new_network_wpa(ssid=x['Name'], password="Mongoose")
+        
         while not check_wifi():
             time.sleep(1)
             pass
+        
         print(" * Configuring " + x['Name'] + "...")
         r = requests.post('http://192.168.4.1/rpc/Config.Set', json=data)
         time.sleep(3)
@@ -190,9 +192,8 @@ def connect():
         time.sleep(1)
         pass
     print(" * Connected to " + ssid + " and ready!")
-    resp = jsonify(ssids)
-    resp.status_code = 200
-    return jsonify(resp)
+    resp = json.dumps(ssids)
+    return resp
 
 
 @app.route("/wificheck", methods=['GET'])
@@ -219,6 +220,7 @@ def on_message(mqtt_client, obj, msg):
     
     shadow['state']['reported'] = esps
     mqtt_client.publish("local/things/RaspberryPi/shadow/update", json.dumps(shadow), qos=1)
+    print(" * Shadow updated!")
 
 
 mqtt_client = mqtt.Client()
