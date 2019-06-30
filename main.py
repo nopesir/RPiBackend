@@ -162,9 +162,10 @@ def connect():
     set_new_network_wpa(ssid=ssid, password=passwd)
 
     while not check_wifi():
+        time.sleep(1)
         pass
 
-    print("WIFI CONNECTED with PASSWORD: " + passwd)
+    print(" * Master SSID: " + ssid)
     ssids = [x for x in getSSID.main() if "Mongoose_" in x['Name']]
     #print(getSSID.main()['Name']
 
@@ -175,8 +176,9 @@ def connect():
     for x in ssids:
         set_new_network_wpa(ssid=x['Name'], password="Mongoose")
         while not check_wifi():
+            time.sleep(1)
             pass
-        print("CONNECTED TO " + x['Name'])
+        print(" * Configuring " + x['Name'] + "...")
         r = requests.post('http://192.168.4.1/rpc/Config.Set', json=data)
         time.sleep(3)
         r2 = requests.post('http://192.168.4.1/rpc/Config.Save', json={'reboot': True})
@@ -185,7 +187,9 @@ def connect():
     set_new_network_wpa(ssid=ssid, password=passwd)
 
     while not check_wifi():
+        time.sleep(1)
         pass
+    print(" * Connected to " + ssid + " and ready!")
     resp = jsonify(ssids)
     resp.status_code = 200
     return jsonify(resp)
