@@ -159,13 +159,14 @@ def connect():
     ssid = request.args.get('ssid')
     passwd = request.args.get('passwd')
 
+    # Clear all stored messages on MosquittoDB
+    subprocess.run("sudo ./clearDB.sh", shell=True, check=True)
+    esps = {}
+
     set_new_network_wpa(ssid=ssid, password=passwd)
 
-    # Clear all sstored messages on MosquittoDB
-    #subprocess.run('mosquitto_sub -t "#" -v | while read line; do mosquitto_pub -t "${line% *}" -r -n; done', shell=True, check=True)
-
     while not check_wifi():
-        time.sleep(1)
+        time.sleep(2)
         pass
 
     print(" * Master SSID: " + ssid)
@@ -180,7 +181,7 @@ def connect():
         set_new_network_wpa(ssid=x['Name'], password="Mongoose")
         
         while not check_wifi():
-            time.sleep(1)
+            time.sleep(2)
             pass
         
         print(" * Configuring " + x['Name'] + "...")
@@ -192,7 +193,7 @@ def connect():
     set_new_network_wpa(ssid=ssid, password=passwd)
 
     while not check_wifi():
-        time.sleep(1)
+        time.sleep(2)
         pass
     print(" * Connected to " + ssid + " and ready!")
     resp = json.dumps(ssids)
