@@ -190,6 +190,12 @@ def connect():
     return resp
 
 
+@app.route("/wificheck", methods=['GET'])
+def ret_wifi_status():
+    check_wifi()
+    return wificheck
+
+
 def on_connect(mqtt_client, obj, flags, rc):
     mqtt_client.subscribe("+/event/state",1)
     mqtt_client.subscribe("+/event/status",1)
