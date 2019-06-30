@@ -136,6 +136,7 @@ app = Flask(__name__)
 
 
 def check_wifi():
+    print(" * Checking wifi...")
     res = False
     try:
         out2 = subprocess.check_output(["sudo", "iwgetid", "-r"])
@@ -187,13 +188,13 @@ def connect():
         pass
     resp = jsonify(ssids)
     resp.status_code = 200
-    return resp
+    return jsonify(resp)
 
 
 @app.route("/wificheck", methods=['GET'])
 def ret_wifi_status():
     check_wifi()
-    return wificheck
+    return jsonify(wificheck)
 
 
 def on_connect(mqtt_client, obj, flags, rc):
