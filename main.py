@@ -222,7 +222,7 @@ def connect():
     
     for x in ssids:
         temp = {}
-        temp = chrono_elem
+        temp = chrono_elem.copy()
         temp['id'] = x['Name']
         chronos.append(temp)
     
