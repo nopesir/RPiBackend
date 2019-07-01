@@ -218,16 +218,22 @@ def connect():
         time.sleep(2)
         pass
     print(" * Connected to " + ssid + " and ready!")
-    resp = json.dumps(ssids)
-
-    for x in resp:
+    
+    
+    for x in ssids:
         temp = chrono_elem
         temp['id'] = x['Name']
         chronos.append(temp)
+    
+    resp = json.dumps(ssids)
+
+    
 
     print(chronos)
 
     runsched()
+
+
     return resp
 
 
@@ -247,7 +253,7 @@ def chrono_set():
 
         return jsonify({"result": True})
     else:
-        return jsonify(chrono_gl)
+        return jsonify(chronos)
 
 
 def on_connect(mqtt_client, obj, flags, rc):
