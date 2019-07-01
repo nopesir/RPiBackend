@@ -9,6 +9,7 @@ import wifi
 import subprocess
 import re
 import requests
+import threading
 import time
 import socket
 import getSSID
@@ -16,21 +17,11 @@ import getSSID
 #from ESP32BLE import ESP32BLEManager
 import paho.mqtt.client as mqtt
 
-message = {
-    'status': 200,
-    'message': 'OK',
-    'ip': "127.0.0.1",
-    'connected': False
-}
-
 wificheck = {
     'ssid': "ssid",
     'online': False,
     'ip': "127.0.0.1"
 }
-
-
-
 
 data = {
     'config': {
@@ -42,16 +33,33 @@ data = {
     }
 }
 
-
-s = sched.scheduler(time.time, time.sleep)
-
 shadow = {
     'state': {
         'reported': {}
     }
 }
 
+chronos = []
+
+chrono_elem = {
+    "id": "Mongoose_XXXXXX",
+    "enabled": False,
+    "days": {
+        "sunday": False,
+        "monday": False,
+        "tuesday": False,
+        "wednsday": False,
+        "thursday": False,
+        "friday": False,
+        "saturday": False
+    },
+    "temp": 15,
+    "start": "00:00",
+    "end": "00:00"
+}
+
 esps = dict()
+
 
 def set_new_network_wpa(ssid, password):
     with open('/etc/wpa_supplicant/wpa_supplicant.conf', 'w') as f:
@@ -136,8 +144,8 @@ def retrieve_ip():
 app = Flask(__name__)
 CORS(app)
 
+
 def check_wifi():
-    print(" * Checking wifi...")
     res = False
     try:
         out2 = subprocess.check_output(["sudo", "iwgetid", "-r"])
@@ -154,6 +162,11 @@ def check_wifi():
 
     return res
 
+ 
+def job(id, data, temp):
+    mqtt_client.publish(str(id) + "event/onoff", str(data))
+    mqtt_client.publish(str(id) + "event/setTemp", str(temp))
+
 
 @app.route("/connect", methods=['GET'])
 def connect():
@@ -163,19 +176,22 @@ def connect():
     # Delete shadow AWS
     mqtt_client.publish("local/things/RaspberryPi/shadow/delete", qos=1)
 
+
     # Clear all stored messages on MosquittoDB
     subprocess.run("sudo ./clearDB.sh", shell=True, check=True)
     esps = {}
 
     set_new_network_wpa(ssid=ssid, password=passwd)
 
+    strin = " * Checking wifi..."
     while not check_wifi():
-        time.sleep(2)
+        strin = strin + "."
+        time.sleep(3)
+        print(strin + "\r")
         pass
 
     print(" * Master SSID: " + ssid)
     ssids = [x for x in getSSID.main() if "Mongoose_" in x['Name']]
-    #print(getSSID.main()['Name']
 
     data['config']['wifi']['sta']['ssid'] = ssid
     data['config']['wifi']['sta']['pass'] = passwd
@@ -183,17 +199,19 @@ def connect():
 
     for x in ssids:
         set_new_network_wpa(ssid=x['Name'], password="Mongoose")
-        
+        strin = " * Checking wifi..."
         while not check_wifi():
-            time.sleep(2)
+            strin = strin + "."
+            time.sleep(3)
+            print(strin + "\r")
             pass
-        
-        print(" * Configuring " + x['Name'] + "...")
+
+        print(" * Configuring " + x['Name'] + "...")       
         r = requests.post('http://192.168.4.1/rpc/Config.Set', json=data)
         time.sleep(3)
-        r2 = requests.post('http://192.168.4.1/rpc/Config.Save', json={'reboot': True})
-        
-    
+        r2 = requests.post(
+            'http://192.168.4.1/rpc/Config.Save', json={'reboot': True})
+
     set_new_network_wpa(ssid=ssid, password=passwd)
 
     while not check_wifi():
@@ -201,6 +219,15 @@ def connect():
         pass
     print(" * Connected to " + ssid + " and ready!")
     resp = json.dumps(ssids)
+
+    for x in resp:
+        temp = chrono_elem
+        temp['id'] = x['Name']
+        chronos.append(temp)
+
+    print(chronos)
+
+    runsched()
     return resp
 
 
@@ -210,9 +237,22 @@ def ret_wifi_status():
     return jsonify(wificheck)
 
 
+@app.route("/chrono", methods=['POST', 'GET'])
+def chrono_set():
+    if request.method == 'POST':
+        print(request.is_json)
+        j_post = request.get_json()
+
+
+
+        return jsonify({"result": True})
+    else:
+        return jsonify(chrono_gl)
+
+
 def on_connect(mqtt_client, obj, flags, rc):
-    mqtt_client.subscribe("+/event/state",1)
-    mqtt_client.subscribe("+/event/status",1)
+    mqtt_client.subscribe("+/event/state", 1)
+    mqtt_client.subscribe("+/event/status", 1)
     print(" * MQTT Subscribed!")
 
 
@@ -222,13 +262,15 @@ def on_message(mqtt_client, obj, msg):
             esps[str(msg.topic[:15])]['online'] = True
         else:
             esps[str(msg.topic[:15])]['online'] = False
-        
+
     else:
         esps[str(msg.topic[:15])] = json.loads(msg.payload)
-    
+
     shadow['state']['reported'] = esps
     mqtt_client.publish("local/things/RaspberryPi/shadow/update", json.dumps(shadow), qos=1)
-    print(" * Shadow updated!")
+
+
+
 
 
 mqtt_client = mqtt.Client()
@@ -238,5 +280,11 @@ mqtt_client.connect("localhost", 1883)
 
 
 mqtt_client.loop_start()
+
+
+def runsched():
+    threading.Timer(30.0, runsched).start()
+
+
 if __name__ == "__main__":
     app.run(host='127.0.0.1')
