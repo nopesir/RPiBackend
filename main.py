@@ -2,6 +2,7 @@ from flask import Flask
 from flask import json
 from flask import request
 from flask import jsonify
+from flask_cors import CORS
 import sched
 import time
 import wifi
@@ -133,7 +134,7 @@ def retrieve_ip():
 
 
 app = Flask(__name__)
-
+CORS(app)
 
 def check_wifi():
     print(" * Checking wifi...")
