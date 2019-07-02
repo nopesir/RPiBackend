@@ -202,12 +202,10 @@ def connect():
             time.sleep(3)
             print(strin + "\r")
             pass
-
         print(" * Configuring " + x['Name'] + "...")       
         r = requests.post('http://192.168.4.1/rpc/Config.Set', json=data)
         time.sleep(3)
-        r2 = requests.post(
-            'http://192.168.4.1/rpc/Config.Save', json={'reboot': True})
+        r2 = requests.post('http://192.168.4.1/rpc/Config.Save', json={'reboot': True})
 
     set_new_network_wpa(ssid=ssid, password=passwd)
 
