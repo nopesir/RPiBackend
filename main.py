@@ -250,9 +250,6 @@ def chrono_set():
                 x['start'] = j_post['start']
                 x['end'] = j_post['end']
                 x['temp'] = j_post['temp']
-        
-
-
         return jsonify({"result": True})
     else:
         return jsonify(chronos)
