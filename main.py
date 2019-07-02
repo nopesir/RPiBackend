@@ -243,7 +243,14 @@ def chrono_set():
     if request.method == 'POST':
         print(request.is_json)
         j_post = request.get_json()
-
+        for x in chronos:
+            if x['id'] == j_post['id']:
+                x['days'] = j_post['days']
+                x['enabled'] = j_post['enabled']
+                x['start'] = j_post['start']
+                x['stop'] = j_post['stop']
+                x['temp'] = j_post['temp']
+        
 
 
         return jsonify({"result": True})
