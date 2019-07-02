@@ -60,6 +60,8 @@ chrono_elem = {
     "end": "00:00"
 }
 
+ssids = []
+
 esps = dict()
 
 
@@ -240,6 +242,9 @@ def ret_wifi_status():
     check_wifi()
     return jsonify(wificheck)
 
+@app.route("/ssids", methods=['GET'])
+def take_ssids():
+    return json.dumps(ssids)
 
 @app.route("/chrono", methods=['POST', 'GET'])
 def chrono_set():
