@@ -248,7 +248,7 @@ def chrono_set():
                 x['days'] = j_post['days']
                 x['enabled'] = j_post['enabled']
                 x['start'] = j_post['start']
-                x['stop'] = j_post['stop']
+                x['end'] = j_post['end']
                 x['temp'] = j_post['temp']
         
 
