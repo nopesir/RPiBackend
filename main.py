@@ -3,6 +3,8 @@ from flask import json
 from flask import request
 from flask import jsonify
 from flask_cors import CORS
+from datetime import date
+import datetime
 import sched
 import time
 import wifi
@@ -162,11 +164,6 @@ def check_wifi():
 
     return res
 
- 
-def job(id, data, temp):
-    mqtt_client.publish(str(id) + "event/onoff", str(data))
-    mqtt_client.publish(str(id) + "event/setTemp", str(temp))
-
 
 @app.route("/connect", methods=['GET'])
 def connect():
@@ -219,7 +216,7 @@ def connect():
         pass
     print(" * Connected to " + ssid + " and ready!")
     
-    
+    # Take the ids of every connected device in order to check for time scheduling
     for x in ssids:
         temp = {}
         temp = chrono_elem.copy()
@@ -228,12 +225,9 @@ def connect():
     
     resp = json.dumps(ssids)
 
-    
-
     print(chronos)
 
     runsched()
-
 
     return resp
 
@@ -291,7 +285,65 @@ mqtt_client.loop_start()
 
 def runsched():
     threading.Timer(30.0, runsched).start()
+    now = datetime.datetime.now()
+    clock = str(now.hour) + ":" + str(now.minute)
+
+    for x in chronos:
+        if x['enabled'] == False:
+            pass
+        else:
+            if date.today().weekday() == 0:
+                if x['days']['monday'] == True:
+                    
+                    if x['start'] == clock:
+                        mqtt_client.publish(x['id'] + "/event/onoff", "on", retain=True)
+                        mqtt_client.publish(x['id'] + "/event/setTemp", x['temp'])
+                    if x['end'] == clock:
+                        mqtt_client.publish(x['id'] + "/event/onoff", "off", retain=True)
+            if date.today().weekday() == 1:
+                if x['days']['tuesday'] == True:
+                    if x['start'] == clock:
+                        mqtt_client.publish(x['id'] + "/event/onoff", "on", retain=True)
+                        mqtt_client.publish(x['id'] + "/event/setTemp", x['temp'])
+                    if x['end'] == clock:
+                        mqtt_client.publish(x['id'] + "/event/onoff", "off", retain=True)
+            if date.today().weekday() == 2:
+                if x['days']['wednsday'] == True:
+                    if x['start'] == clock:
+                        mqtt_client.publish(x['id'] + "/event/onoff", "on", retain=True)
+                        mqtt_client.publish(x['id'] + "/event/setTemp", x['temp'])
+                    if x['end'] == clock:
+                        mqtt_client.publish(x['id'] + "/event/onoff", "off", retain=True)
+            if date.today().weekday() == 3:
+                if x['days']['thursday'] == True:
+                    if x['start'] == clock:
+                        mqtt_client.publish(x['id'] + "/event/onoff", "on", retain=True)
+                        mqtt_client.publish(x['id'] + "/event/setTemp", x['temp'])
+                    if x['end'] == clock:
+                        mqtt_client.publish(x['id'] + "/event/onoff", "off",retain=True)
+            if date.today().weekday() == 4:
+                if x['days']['friday'] == True:
+                    if x['start'] == clock:
+                        mqtt_client.publish(x['id'] + "/event/onoff", "on", retain=True)
+                        mqtt_client.publish(x['id'] + "/event/setTemp", x['temp'])
+                    if x['end'] == clock:
+                        mqtt_client.publish(x['id'] + "/event/onoff", "off", retain=True)
+            if date.today().weekday() == 5:
+                if x['days']['saturday'] == True:
+                    if x['start'] == clock:
+                        mqtt_client.publish(x['id'] + "/event/onoff", "on", retain=True)
+                        mqtt_client.publish(x['id'] + "/event/setTemp", x['temp'])
+                    if x['end'] == clock:
+                        mqtt_client.publish(x['id'] + "/event/onoff", "off", retain=True)
+            if date.today().weekday() == 6:
+                if x['days']['sunday'] == True:
+                    if x['start'] == clock:
+                        mqtt_client.publish(x['id'] + "/event/onoff", "on", retain=True)
+                        mqtt_client.publish(x['id'] + "/event/setTemp", x['temp'])
+                    if x['end'] == clock:
+                        mqtt_client.publish(x['id'] + "/event/onoff", "off", retain=True)
+
 
 
 if __name__ == "__main__":
-    app.run(host='127.0.0.1')
+    app.run(host='0.0.0.0')
