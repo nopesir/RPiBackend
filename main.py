@@ -169,6 +169,7 @@ def check_wifi():
 
 @app.route("/connect", methods=['GET'])
 def connect():
+    global ssids
     ssid = request.args.get('ssid')
     passwd = request.args.get('passwd')
 
