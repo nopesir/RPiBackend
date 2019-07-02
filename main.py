@@ -297,22 +297,22 @@ def runsched():
 
     for x in chronos:
         if x['enabled'] == False:
-            pass
+            print(" * " + x['id'] + " chrono is disabled")
         else:
+            print(" * " + x['id'] + " chrono is enabled")
             if date.today().weekday() == 0:
                 if x['days']['monday'] == True:
-                    
-                    if x['start'] == clock:
+                    if str(x['start']) == str(clock):
                         mqtt_client.publish(x['id'] + "/event/onoff", "on", retain=True)
                         mqtt_client.publish(x['id'] + "/event/setTemp", x['temp'])
                     if x['end'] == clock:
                         mqtt_client.publish(x['id'] + "/event/onoff", "off", retain=True)
             if date.today().weekday() == 1:
-                if x['days']['tuesday'] == True:
-                    if x['start'] == clock:
+                if bool(x['days']['tuesday']) == True:
+                    if str(x['start']) == str(clock):
                         mqtt_client.publish(x['id'] + "/event/onoff", "on", retain=True)
                         mqtt_client.publish(x['id'] + "/event/setTemp", x['temp'])
-                    if x['end'] == clock:
+                    if str(x['end']) == str(clock):
                         mqtt_client.publish(x['id'] + "/event/onoff", "off", retain=True)
             if date.today().weekday() == 2:
                 if x['days']['wednsday'] == True:
