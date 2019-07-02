@@ -308,10 +308,13 @@ def runsched():
                     if x['end'] == clock:
                         mqtt_client.publish(x['id'] + "/event/onoff", "off", retain=True)
             if date.today().weekday() == 1:
+                print(" * It's tuesday!")
                 if bool(x['days']['tuesday']) == True:
+                    print(" * It's tuesday! SET")
                     if str(x['start']) == str(clock):
-                        mqtt_client.publish(x['id'] + "/event/onoff", "on", retain=True)
-                        mqtt_client.publish(x['id'] + "/event/setTemp", x['temp'])
+                        print(" * It's tuesday with clock!")
+                        mqtt_client.publish(str(x['id']) + "/event/onoff", "on", retain=True)
+                        mqtt_client.publish(str(x['id']) + "/event/setTemp", str(x['temp']))
                     if str(x['end']) == str(clock):
                         mqtt_client.publish(x['id'] + "/event/onoff", "off", retain=True)
             if date.today().weekday() == 2:
