@@ -308,6 +308,8 @@ def runsched():
                 print(" * It's tuesday!")
                 if bool(x['days']['tuesday']) == True:
                     print(" * It's tuesday! SET")
+                    print(x['start'])
+                    print(clock)
                     if str(x['start']) == str(clock):
                         print(" * It's tuesday with clock!")
                         mqtt_client.publish(str(x['id']) + "/event/onoff", "on", retain=True)
