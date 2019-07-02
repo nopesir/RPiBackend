@@ -179,7 +179,7 @@ def connect():
     esps = {}
 
     set_new_network_wpa(ssid=ssid, password=passwd)
-
+    time.sleep(3)
     strin = " * Checking wifi..."
     while not check_wifi():
         strin = strin + "."
@@ -197,21 +197,26 @@ def connect():
     for x in ssids:
         set_new_network_wpa(ssid=x['Name'], password="Mongoose")
         strin = " * Checking wifi..."
+
         while not check_wifi():
             strin = strin + "."
             time.sleep(3)
             print(strin + "\r")
             pass
+        
         print(" * Configuring " + x['Name'] + "...")       
         r = requests.post('http://192.168.4.1/rpc/Config.Set', json=data)
-        time.sleep(3)
+        time.sleep(5)
         r2 = requests.post('http://192.168.4.1/rpc/Config.Save', json={'reboot': True})
 
     set_new_network_wpa(ssid=ssid, password=passwd)
-
+    
+    time.sleep(3)
+    
     while not check_wifi():
         time.sleep(2)
         pass
+    
     print(" * Connected to " + ssid + " and ready!")
     
     # Take the ids of every connected device in order to check for time scheduling
