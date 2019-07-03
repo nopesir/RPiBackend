@@ -23,7 +23,7 @@ def replyToPing(sequence):
 
 # Custom MQTT message callback
 def customCallback(client, userdata, message):
-    print("* Received ping!")
+    print(" * Received ping!")
     messageContent = json.loads(message.payload.decode('utf-8'))
     messageData = messageContent['event']
     if messageContent['event_id'] == 0:
