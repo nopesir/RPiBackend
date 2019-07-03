@@ -19,19 +19,13 @@ def replyToPing(sequence):
     messageJson = json.dumps(message)
     myAWSIoTMQTTClient.publishAsync("pl19/event", messageJson, 1)
 
-    print('Published topic %s: %s\n' % (topic, messageJson))
+    print(' * Ping answered!')
 
 # Custom MQTT message callback
 def customCallback(client, userdata, message):
-    print("Received a new message: ")
+    print("* Received ping!")
     messageContent = json.loads(message.payload.decode('utf-8'))
     messageData = messageContent['event']
-    print(messageContent)
-    print(messageData['message'])
-    print("Sequence ", messageData['sequence'])
-    print("from topic: ")
-    print(message.topic)
-    print("--------------\n\n")
     if messageContent['event_id'] == 0:
         replyToPing(messageData['sequence'])
 
