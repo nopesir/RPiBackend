@@ -325,9 +325,10 @@ def on_message(mqtt_client, obj, msg):
 
     else:
         esps[str(msg.topic[:15])] = json.loads(msg.payload)
+        state = json.dumps(esps[str(msg.topic[:15])])
         conn = sqlite3.connect('/home/pi/local.db')
         c = conn.cursor()
-        c.execute("""INSERT INTO measured (id, state) VALUES ((?), json((?))""", (mongoose, esps[str(msg.topic[:15])]))
+        c.execute("""INSERT INTO measured (id, state) VALUES ((?), json((?))""", (mongoose, state))
         conn.commit()
         conn.close()
 
