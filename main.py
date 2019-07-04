@@ -314,7 +314,7 @@ def on_message(mqtt_client, obj, msg):
         print(int((msg.payload).decode('utf-8')))
         conn = sqlite3.connect('/home/pi/local.db')
         c = conn.cursor()
-        c.execute("""INSERT INTO desired(id, timestamp, value) VALUES((?), CURRENT_TIMESTAMP, (?))""", str(msg.topic[:15]), (msg.payload).decode('utf-8'))
+        c.execute("""INSERT INTO desired(id, timestamp, value) VALUES((?), CURRENT_TIMESTAMP, (?))""", (msg.topic[:15]).decode('utf-8'), int((msg.payload).decode('utf-8')) )
         conn.commit()
     else:
         esps[str(msg.topic[:15])] = json.loads(msg.payload)
