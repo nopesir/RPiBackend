@@ -319,7 +319,7 @@ def on_message(mqtt_client, obj, msg):
 
         conn = sqlite3.connect('/home/pi/local.db')
         c = conn.cursor()
-        c.execute("""INSERT INTO desired (id, timestamp, value) VALUES ((?), (?))""", (mongoose, value))
+        c.execute("""INSERT INTO desired (id, value) VALUES ((?), (?))""", (mongoose, value))
         conn.commit()
         conn.close()
 
