@@ -4,7 +4,6 @@ from flask import request
 from flask import jsonify
 from flask_cors import CORS
 from datetime import date
-import pingServiceClient
 import datetime
 import time
 import subprocess
@@ -316,9 +315,6 @@ mqtt_client.on_connect = on_connect
 mqtt_client.on_message = on_message
 mqtt_client.connect("localhost", 1883)
 mqtt_client.loop_start()
-
-# Run the ping listener and publisher of AWS
-pingServiceClient
 
 # Thread that checks if some schedule is set into the 'chronos' object
 def runsched():
