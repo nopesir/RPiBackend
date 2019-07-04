@@ -304,6 +304,7 @@ def on_connect(mqtt_client, obj, flags, rc):
 # MQTT callback for every message published on every subscribed topic
 def on_message(mqtt_client, obj, msg):
     global esps
+    global ssids
     if(str(msg.topic[-6:]) == "status"):
         if((msg.payload).decode('utf-8') == "online"):
             esps[str(msg.topic[:15])]['online'] = True
@@ -325,6 +326,14 @@ def on_message(mqtt_client, obj, msg):
         conn.close()
 
     else:
+        flag = True
+        for x in ssids:
+            if(str(x['Name']) == str(msg.topic[:15])):
+                flag = False
+        
+        if(flag):
+            ssids.append({"Address": "30:AE:A4:75:25:B1", "Channel": "6", "Encryption": "WEP", "Name": str(msg.topic[:15]), "Quality": " 97 %", "Signal": "-42 dBm"})
+
         esps[str(msg.topic[:15])] = json.loads(msg.payload)
         ide = str(msg.topic[:15])
         temp = str(esps[str(msg.topic[:15])]['currTemp'])
