@@ -303,6 +303,7 @@ def on_connect(mqtt_client, obj, flags, rc):
 
 # MQTT callback for every message published on every subscribed topic
 def on_message(mqtt_client, obj, msg):
+    global esps
     if(str(msg.topic[-6:]) == "status"):
         if((msg.payload).decode('utf-8') == "online"):
             esps[str(msg.topic[:15])]['online'] = True
