@@ -310,21 +310,19 @@ def on_message(mqtt_client, obj, msg):
             esps[str(msg.topic[:15])]['online'] = False
 
     elif(str(msg.topic[-7:]) == "setTemp"):
-        print(str(msg.topic[:15]))
-        print(int((msg.payload).decode('utf-8')))
-        mongoose = (msg.topic[:15]).decode('utf-8')
+        
+        mongoose = str(msg.topic[:15])
         value = (msg.payload).decode('utf-8')
-        conn = sqlite3.connect('/home/pi/local.db')
-        timest = str(int(time.time()))
 
         print(mongoose)
-        print(timest)
         print(value)
 
+        conn = sqlite3.connect('/home/pi/local.db')
         c = conn.cursor()
-        c.execute("""INSERT INTO desired (id, timestamp, value) VALUES ((?), (?), (?))""", (mongoose,timest, value))
+        c.execute("""INSERT INTO desired (id, timestamp, value) VALUES ((?), (?))""", (mongoose, value))
         conn.commit()
         conn.close()
+
     else:
         esps[str(msg.topic[:15])] = json.loads(msg.payload)
 
