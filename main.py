@@ -327,7 +327,7 @@ def on_message(mqtt_client, obj, msg):
     else:
         esps[str(msg.topic[:15])] = json.loads(msg.payload)
         print("mannaia")
-        state = jsonify(esps[str(msg.topic[:15])])
+        state = (msg.payload).decode('utf-8')
         print(state)
         conn = sqlite3.connect('/home/pi/local.db')
         c = conn.cursor()
