@@ -331,7 +331,7 @@ def on_message(mqtt_client, obj, msg):
         hum = str(esps[str(msg.topic[:15])]['humidity'])
         conn = sqlite3.connect('/home/pi/local.db')
         c = conn.cursor()
-        c.execute("""INSERT INTO measured (id, temp, hum) VALUES ((?), (?), (?))""", (mongoose, temp, hum))
+        c.execute("""INSERT INTO measured (id, temp, hum) VALUES ((?), (?), (?))""", (ide, temp, hum))
         conn.commit()
         conn.close()
 
