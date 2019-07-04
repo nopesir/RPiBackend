@@ -7,6 +7,7 @@ from datetime import date
 import datetime
 import time
 import subprocess
+import sqlite3
 import re
 import requests
 import threading
@@ -136,6 +137,8 @@ def set_ap():
 
 # Take the local IP of the raspberry
 # in order to send it to the Mongoose_XXXXXX
+
+
 def retrieve_ip():
     return ([l for l in ([ip for ip in socket.gethostbyname_ex(socket.gethostname())[2]
                           if not ip.startswith("127.")][:1], [[(s.connect(('8.8.8.8', 53)),
@@ -147,7 +150,8 @@ def retrieve_ip():
 def check_wifi():
     res = False
     try:
-        out2 = subprocess.check_output(["sudo", "iwgetid", "-r"])           # run 'sudo iwgetid -r' into the bash
+        # run 'sudo iwgetid -r' into the bash
+        out2 = subprocess.check_output(["sudo", "iwgetid", "-r"])
         wificheck['online'] = True
         wificheck['ssid'] = re.sub('\\n', '', out2.decode('utf-8'))
         wificheck['ip'] = retrieve_ip()
@@ -172,10 +176,9 @@ def connect():
     # Delete shadow state on Amazon AWS
     mqtt_client.publish("local/things/RaspberryPi/shadow/delete", qos=1)
 
-
     # Clear all stored messages on MosquittoDB
     subprocess.run("sudo ./clearDB.sh", shell=True, check=True)
-    
+
     # Reset the object
     esps = {}
 
@@ -212,34 +215,35 @@ def connect():
             time.sleep(3)
             print(strin + "\r")
             pass
-        
-        print(" * Configuring " + x['Name'] + "...")       
-        
+
+        print(" * Configuring " + x['Name'] + "...")
+
         # POST the data to Mongoose OS with IP, SSID, PASS
         r = requests.post('http://192.168.4.1/rpc/Config.Set', json=data)
         time.sleep(5)
         # POST the save and reboot command for Mongoose OS
-        r2 = requests.post('http://192.168.4.1/rpc/Config.Save', json={'reboot': True})
+        r2 = requests.post(
+            'http://192.168.4.1/rpc/Config.Save', json={'reboot': True})
 
     # At the end, connect to the network
     set_new_network_wpa(ssid=ssid, password=passwd)
-    
+
     time.sleep(3)
-    
+
     # Wait for the connection
     while not check_wifi():
         time.sleep(2)
         pass
-    
+
     print(" * Connected to " + ssid + " and ready!")
-    
+
     # Take the ids of every connected device in order to check for time scheduling
     for x in ssids:
         temp = {}
         temp = chrono_elem.copy()
         temp['id'] = x['Name']
         chronos.append(temp)
-    
+
     # Transform the JSON into a string
     resp = json.dumps(ssids)
 
@@ -248,7 +252,6 @@ def connect():
 
     # Return the correctly connected devices as a vector of dict
     return resp
-
 
 
 # Flask ENDPOINT:
@@ -265,7 +268,7 @@ def take_ssids():
     return json.dumps(ssids)
 
 
-# Flask ENDPOINT: 
+# Flask ENDPOINT:
 # POST to modify the settings for a specific Mongoose_XXXXXX
 # GET to retrieve all the settings of all the Mongoose_XXXXXX
 @app.route("/chrono", methods=['POST', 'GET'])
@@ -280,17 +283,21 @@ def chrono_set():
                 x['start'] = j_post['start']
                 x['end'] = j_post['end']
                 x['temp'] = j_post['temp']
-        
+
         shadow['state']['reported']['chronos'] = chronos
-        mqtt_client.publish("local/things/RaspberryPi/shadow/update", json.dumps(shadow), qos=1)
+        mqtt_client.publish(
+            "local/things/RaspberryPi/shadow/update", json.dumps(shadow), qos=1)
         return jsonify({"result": True})
     else:
         return jsonify(chronos)
 
 # MQTT callback after connection, here there are the subscribes
+
+
 def on_connect(mqtt_client, obj, flags, rc):
     mqtt_client.subscribe("+/event/state", 1)
     mqtt_client.subscribe("+/event/status", 1)
+    mqtt_client.subscribe("+/event/setTemp", 1)
     print(" * MQTT Subscribed!")
 
 
@@ -302,11 +309,17 @@ def on_message(mqtt_client, obj, msg):
         else:
             esps[str(msg.topic[:15])]['online'] = False
 
+    elif(str(msg.topic[-7:]) == "setTemp"):
+        conn = sqlite3.connect('/home/pi/local.db')
+        c = conn.cursor()
+        c.execute("""INSERT INTO desired(id, timestamp, value) VALUES((?), (?), (?))""", str(msg.topic[:15]), time.mktime(datetime.datetime.today().timetuple()),  int((msg.payload).decode('utf-8')))
+        conn.commit()
     else:
         esps[str(msg.topic[:15])] = json.loads(msg.payload)
 
     shadow['state']['reported'] = esps
-    mqtt_client.publish("local/things/RaspberryPi/shadow/update", json.dumps(shadow), qos=1)
+    mqtt_client.publish(
+        "local/things/RaspberryPi/shadow/update", json.dumps(shadow), qos=1)
 
 
 # MQTT callbacks and configuration
@@ -317,10 +330,12 @@ mqtt_client.connect("localhost", 1883)
 mqtt_client.loop_start()
 
 # Thread that checks if some schedule is set into the 'chronos' object
+
+
 def runsched():
     # Restart this fuction after 30 seconds
     threading.Timer(30.0, runsched).start()
-    
+
     # Take the local hour and transform it as a string
     now = datetime.datetime.now()
     clock = str(now.hour) + ":" + str(now.minute)
@@ -335,65 +350,87 @@ def runsched():
                 if bool(x['days']['monday']) == True:
                     if str(x['start']) == str(clock):
                         print(" * Time to enable " + x['id'])
-                        mqtt_client.publish(str(x['id']) + "/event/onoff", "on", retain=True)
-                        mqtt_client.publish(str(x['id']) + "/event/setTemp", str(x['temp']))
+                        mqtt_client.publish(
+                            str(x['id']) + "/event/onoff", "on", retain=True)
+                        mqtt_client.publish(
+                            str(x['id']) + "/event/setTemp", str(x['temp']))
                     if str(x['end']) == str(clock):
                         print(" * Time to disable " + x['id'])
-                        mqtt_client.publish(x['id'] + "/event/onoff", "off", retain=True)
+                        mqtt_client.publish(
+                            x['id'] + "/event/onoff", "off", retain=True)
             if date.today().weekday() == 1:
                 if bool(x['days']['tuesday']) == True:
                     if str(x['start']) == str(clock):
                         print(" * Time to enable " + x['id'])
-                        mqtt_client.publish(str(x['id']) + "/event/onoff", "on", retain=True)
-                        mqtt_client.publish(str(x['id']) + "/event/setTemp", str(x['temp']), retain=True)
+                        mqtt_client.publish(
+                            str(x['id']) + "/event/onoff", "on", retain=True)
+                        mqtt_client.publish(
+                            str(x['id']) + "/event/setTemp", str(x['temp']), retain=True)
                     if str(x['end']) == str(clock):
                         print(" * Time to disable " + x['id'])
-                        mqtt_client.publish(x['id'] + "/event/onoff", "off", retain=True)
+                        mqtt_client.publish(
+                            x['id'] + "/event/onoff", "off", retain=True)
             if date.today().weekday() == 2:
                 if bool(x['days']['wednesday']) == True:
                     if str(x['start']) == str(clock):
                         print(" * Time to enable " + x['id'])
-                        mqtt_client.publish(str(x['id']) + "/event/onoff", "on", retain=True)
-                        mqtt_client.publish(str(x['id']) + "/event/setTemp", str(x['temp']), retain=True)
+                        mqtt_client.publish(
+                            str(x['id']) + "/event/onoff", "on", retain=True)
+                        mqtt_client.publish(
+                            str(x['id']) + "/event/setTemp", str(x['temp']), retain=True)
                     if str(x['end']) == str(clock):
                         print(" * Time to disable " + x['id'])
-                        mqtt_client.publish(x['id'] + "/event/onoff", "off", retain=True)
+                        mqtt_client.publish(
+                            x['id'] + "/event/onoff", "off", retain=True)
             if date.today().weekday() == 3:
                 if bool(x['days']['thursday']) == True:
                     if str(x['start']) == str(clock):
                         print(" * Time to enable " + x['id'])
-                        mqtt_client.publish(str(x['id']) + "/event/onoff", "on", retain=True)
-                        mqtt_client.publish(str(x['id']) + "/event/setTemp", str(x['temp']), retain=True)
+                        mqtt_client.publish(
+                            str(x['id']) + "/event/onoff", "on", retain=True)
+                        mqtt_client.publish(
+                            str(x['id']) + "/event/setTemp", str(x['temp']), retain=True)
                     if str(x['end']) == str(clock):
                         print(" * Time to disable " + x['id'])
-                        mqtt_client.publish(x['id'] + "/event/onoff", "off", retain=True)
+                        mqtt_client.publish(
+                            x['id'] + "/event/onoff", "off", retain=True)
             if date.today().weekday() == 4:
                 if bool(x['days']['friday']) == True:
                     if str(x['start']) == str(clock):
                         print(" * Time to enable " + x['id'])
-                        mqtt_client.publish(str(x['id']) + "/event/onoff", "on", retain=True)
-                        mqtt_client.publish(str(x['id']) + "/event/setTemp", str(x['temp']), retain=True)
+                        mqtt_client.publish(
+                            str(x['id']) + "/event/onoff", "on", retain=True)
+                        mqtt_client.publish(
+                            str(x['id']) + "/event/setTemp", str(x['temp']), retain=True)
                     if str(x['end']) == str(clock):
                         print(" * Time to disable " + x['id'])
-                        mqtt_client.publish(x['id'] + "/event/onoff", "off", retain=True)
+                        mqtt_client.publish(
+                            x['id'] + "/event/onoff", "off", retain=True)
             if date.today().weekday() == 5:
                 if bool(x['days']['saturday']) == True:
                     if str(x['start']) == str(clock):
                         print(" * Time to enable " + x['id'])
-                        mqtt_client.publish(str(x['id']) + "/event/onoff", "on", retain=True)
-                        mqtt_client.publish(str(x['id']) + "/event/setTemp", str(x['temp']), retain=True)
+                        mqtt_client.publish(
+                            str(x['id']) + "/event/onoff", "on", retain=True)
+                        mqtt_client.publish(
+                            str(x['id']) + "/event/setTemp", str(x['temp']), retain=True)
                     if str(x['end']) == str(clock):
                         print(" * Time to disable " + x['id'])
-                        mqtt_client.publish(x['id'] + "/event/onoff", "off", retain=True)
+                        mqtt_client.publish(
+                            x['id'] + "/event/onoff", "off", retain=True)
             if date.today().weekday() == 6:
                 if bool(x['days']['sunday']) == True:
                     if str(x['start']) == str(clock):
                         print(" * Time to enable " + x['id'])
-                        mqtt_client.publish(str(x['id']) + "/event/onoff", "on", retain=True)
-                        mqtt_client.publish(str(x['id']) + "/event/setTemp", str(x['temp']), retain=True)
+                        mqtt_client.publish(
+                            str(x['id']) + "/event/onoff", "on", retain=True)
+                        mqtt_client.publish(
+                            str(x['id']) + "/event/setTemp", str(x['temp']), retain=True)
                     if str(x['end']) == str(clock):
                         print(" * Time to disable " + x['id'])
-                        mqtt_client.publish(x['id'] + "/event/onoff", "off", retain=True)
+                        mqtt_client.publish(
+                            x['id'] + "/event/onoff", "off", retain=True)
+
 
 if __name__ == "__main__":
     app.run(host='0.0.0.0')
