@@ -315,7 +315,7 @@ def on_message(mqtt_client, obj, msg):
         mongoose = (msg.topic[:15]).decode('utf-8')
         value = (msg.payload).decode('utf-8')
         conn = sqlite3.connect('/home/pi/local.db')
-        timest = int(time.time())
+        timest = str(int(time.time()))
 
         print(mongoose)
         print(timest)
