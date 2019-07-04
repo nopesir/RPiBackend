@@ -309,7 +309,7 @@ def on_message(mqtt_client, obj, msg):
         else:
             esps[str(msg.topic[:15])]['online'] = False
 
-    elif(str(msg.topic[-7:]) == "setTemp"):
+    if(str(msg.topic[-7:]) == "setTemp"):
         
         mongoose = str(msg.topic[:15])
         value = (msg.payload).decode('utf-8')
@@ -326,7 +326,7 @@ def on_message(mqtt_client, obj, msg):
     else:
         esps[str(msg.topic[:15])] = json.loads(msg.payload)
         state = jsonify(esps[str(msg.topic[:15])])
-        print(esps[str(msg.topic[:15])])
+        print(state)
         conn = sqlite3.connect('/home/pi/local.db')
         c = conn.cursor()
         c.execute("""INSERT INTO measured (id, state) VALUES ((?), json((?))""", (mongoose, state))
