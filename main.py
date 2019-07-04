@@ -310,6 +310,9 @@ def on_message(mqtt_client, obj, msg):
             esps[str(msg.topic[:15])]['online'] = False
 
     elif(str(msg.topic[-7:]) == "setTemp"):
+        print(str(msg.topic[:15]))
+        print(time.mktime(datetime.datetime.today().timetuple()))
+        print(int((msg.payload).decode('utf-8')))
         conn = sqlite3.connect('/home/pi/local.db')
         c = conn.cursor()
         c.execute("""INSERT INTO desired(id, timestamp, value) VALUES((?), (?), (?))""", str(msg.topic[:15]), time.mktime(datetime.datetime.today().timetuple()),  int((msg.payload).decode('utf-8')))
