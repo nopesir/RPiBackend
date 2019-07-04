@@ -312,9 +312,17 @@ def on_message(mqtt_client, obj, msg):
     elif(str(msg.topic[-7:]) == "setTemp"):
         print(str(msg.topic[:15]))
         print(int((msg.payload).decode('utf-8')))
+        mongoose = (msg.topic[:15]).decode('utf-8')
+        value = (msg.payload).decode('utf-8')
         conn = sqlite3.connect('/home/pi/local.db')
+        timest = int(time.time())
+
+        print(mongoose)
+        print(timest)
+        print(value)
+
         c = conn.cursor()
-        c.execute("""INSERT INTO desired (id, timestamp, value) VALUES ((?), CURRENT_TIMESTAMP, (?))""", (msg.topic[:15]).decode('utf-8'), int((msg.payload).decode('utf-8')),)
+        c.execute("""INSERT INTO desired (id, timestamp, value) VALUES ((?), (?), (?))""", (mongoose,timest, value))
         conn.commit()
         conn.close()
     else:
