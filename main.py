@@ -331,7 +331,7 @@ def on_message(mqtt_client, obj, msg):
         print(state)
         conn = sqlite3.connect('/home/pi/local.db')
         c = conn.cursor()
-        c.execute("""INSERT INTO measured (id, state) VALUES ((?), json(?)""", (mongoose, state))
+        c.execute("""INSERT INTO measured (id, state) VALUES ((?), json('?')""", (mongoose, state))
         conn.commit()
         conn.close()
 
