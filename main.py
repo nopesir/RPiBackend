@@ -273,17 +273,19 @@ def take_ssids():
 # GET to retrieve all the settings of all the Mongoose_XXXXXX
 @app.route("/chrono", methods=['POST', 'GET'])
 def chrono_set():
+    global chronos
     if request.method == 'POST':
         print(request.is_json)
-        flag = False
+        
         j_post = request.get_json()
+        flag = False
         for x in chronos:
             if str(x['id']) == str(j_post['id']):
-                x['days'] = j_post['days']
-                x['enabled'] = j_post['enabled']
-                x['start'] = j_post['start']
-                x['end'] = j_post['end']
-                x['temp'] = j_post['temp']
+                x['days'] = str(j_post['days'])
+                x['enabled'] = str(j_post['enabled'])
+                x['start'] = str(j_post['start'])
+                x['end'] = str(j_post['end'])
+                x['temp'] = str(j_post['temp'])
             else:
                 flag = True
 
