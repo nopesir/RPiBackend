@@ -277,7 +277,8 @@ def chrono_set():
     global chrono_elem
     if request.method == 'POST':
         j_post = request.get_json()
-        founds = [x for x in chronos if (str(x['id']) == str(j_post['id']))]
+        founds = []
+        founds = [x for x in chronos if str(x['id']) in str(j_post['id'])]
         print(founds)
         if(not founds):
             chrono_elem['id'] = str(j_post['id'])
