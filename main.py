@@ -275,6 +275,7 @@ def take_ssids():
 def chrono_set():
     if request.method == 'POST':
         print(request.is_json)
+        flag = False
         j_post = request.get_json()
         for x in chronos:
             if str(x['id']) == str(j_post['id']):
@@ -284,8 +285,10 @@ def chrono_set():
                 x['end'] = j_post['end']
                 x['temp'] = j_post['temp']
             else:
-                chronos.append(j_post)
+                flag = True
 
+        if(flag or (not chronos)):
+            chronos.append(j_post)
         
         shadow['state']['reported']['chronos'] = chronos
         mqtt_client.publish(
