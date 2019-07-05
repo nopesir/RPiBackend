@@ -283,6 +283,8 @@ def chrono_set():
                 x['start'] = j_post['start']
                 x['end'] = j_post['end']
                 x['temp'] = j_post['temp']
+            else:
+                chronos.append(j_post)
 
         
         shadow['state']['reported']['chronos'] = chronos
