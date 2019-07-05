@@ -128,7 +128,7 @@ def set_ap():
         f.write('require dhcp_server_identifier\n\n')
         f.write('slaac private\n\n')
         f.write('interface wlan0\n')
-        f.write('static ip_address=192.168.0.1/24\n')
+        f.write('static ip_address=192.168.11.1/24\n')
         f.write('denyinterfaces wlan0\n')
         f.write('denyinterfaces eth0\n')
         f.close()
@@ -275,7 +275,7 @@ def take_ssids():
 def chrono_set():
     global chronos
     if request.method == 'POST':
-        print(request.is_json)
+        print(request.get_json())
         
         j_post = request.get_json()
         flag = False
@@ -290,7 +290,7 @@ def chrono_set():
                 flag = True
 
         if(flag or (not chronos)):
-            chronos.append(json.loads(j_post))
+            chronos.append(j_post)
         
         shadow['state']['reported']['chronos'] = chronos
         mqtt_client.publish(
