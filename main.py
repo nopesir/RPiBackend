@@ -297,10 +297,9 @@ def chrono_set():
                     chronos[n]['end'] = str(j_post['end'])
                     chronos[n]['temp'] = j_post['temp']
         
-        chronos = list(set(chronos))
+        chronos = list({v['id']:v for v in chronos}.values())
         shadow['state']['reported']['chronos'] = chronos
-        mqtt_client.publish(
-            "local/things/RaspberryPi/shadow/update", json.dumps(shadow), qos=1)
+        mqtt_client.publish("local/things/RaspberryPi/shadow/update", json.dumps(shadow), qos=1)
         return jsonify({"result": True})
     else:
         return jsonify(chronos)
