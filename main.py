@@ -282,21 +282,21 @@ def chrono_set():
         flag = False
         for x in chronos:
             if str(x['id']) == str(j_post['id']):
-                x['days'] = str(j_post['days'])
-                x['enabled'] = str(j_post['enabled'])
+                x['days'] = j_post['days']
+                x['enabled'] = j_post['enabled']
                 x['start'] = str(j_post['start'])
                 x['end'] = str(j_post['end'])
-                x['temp'] = str(j_post['temp'])
+                x['temp'] = j_post['temp']
             else:
                 flag = True
 
         if(flag or (not chronos)):
             chrono_elem['id'] = str(j_post['id'])
-            chrono_elem['days'] = str(j_post['days'])
-            chrono_elem['enabled'] = str(j_post['enabled'])
+            chrono_elem['days'] = j_post['days']
+            chrono_elem['enabled'] = j_post['enabled']
             chrono_elem['start'] = str(j_post['start'])
             chrono_elem['end'] = str(j_post['end'])
-            chrono_elem['temp'] = str(j_post['temp'])
+            chrono_elem['temp'] = j_post['temp']
             chronos.append(chrono_elem)
         
         shadow['state']['reported']['chronos'] = chronos
