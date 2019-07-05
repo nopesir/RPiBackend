@@ -290,11 +290,13 @@ def chrono_set():
                 flag = True
 
         if(flag or (not chronos)):
-            chronos.append(j_post)
+            temp  = json.dumps(j_post)
+            temp = jsonify(temp)
+            chronos.append(temp)
         
         shadow['state']['reported']['chronos'] = chronos
         mqtt_client.publish(
-            "local/things/RaspberryPi/shadow/update", json.dumps(shadow), qos=1)
+            "local/things/RaspberryPi/shadow/update", jsonify(shadow), qos=1)
         return jsonify({"result": True})
     else:
         return jsonify(chronos)
