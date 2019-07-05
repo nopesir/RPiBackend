@@ -274,6 +274,7 @@ def take_ssids():
 @app.route("/chrono", methods=['POST', 'GET'])
 def chrono_set():
     global chronos
+    global chrono_elem
     if request.method == 'POST':
         print(request.get_json())
         
@@ -290,9 +291,13 @@ def chrono_set():
                 flag = True
 
         if(flag or (not chronos)):
-            temp  = json.dumps(j_post)
-            temp = jsonify(temp)
-            chronos.append(temp)
+            chrono_elem['id'] = str(j_post['id'])
+            chrono_elem['days'] = str(j_post['days'])
+            chrono_elem['enabled'] = str(j_post['enabled'])
+            chrono_elem['start'] = str(j_post['start'])
+            chrono_elem['end'] = str(j_post['end'])
+            chrono_elem['temp'] = str(j_post['temp'])
+            chronos.append(chrono_elem)
         
         shadow['state']['reported']['chronos'] = chronos
         mqtt_client.publish(
