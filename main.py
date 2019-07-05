@@ -351,6 +351,7 @@ def on_message(mqtt_client, obj, msg):
         c.execute("""INSERT INTO measured (id, temp, hum) VALUES ((?), (?), (?))""", (ide, temp, hum))
         conn.commit()
         conn.close()
+        mqtt_client.publish("local/" + str(msg.topic), (msg.payload).decode('utf-8'), retain=False)
 
     shadow['state']['reported'] = esps
     mqtt_client.publish(
@@ -372,20 +373,18 @@ mqtt_client.loop_start()
 def on_connect_aws(mqtt_client_aws, obj, flags, rc):
     mqtt_client_aws.subscribe("local/+/event/onoff", 1)
     mqtt_client_aws.subscribe("local/+/event/setTemp", 1)
+    mqtt_client_aws.subscribe("local/+/event/setname", 1)
     print(" * MQTT from AWS Subscribed!")
 
 
 def on_message_aws(mqtt_client_aws, obj, msg):
     if(str(msg.topic[-5:]) == "onoff"):
-        print("ONOFF")
-        print(str(msg.topic[-18:]))
-        print((msg.payload).decode('utf-8'))
         mqtt_client_aws.publish(str(msg.topic[-27:]), (msg.payload).decode('utf-8'), retain=True)
     elif(str(msg.topic[-7:]) == "setTemp"):
-        print("SETTEMP")
         mqtt_client_aws.publish(str(msg.topic[-29:]), (msg.payload).decode('utf-8'), retain=True)
-    print("NOPE")
-    print(msg.payload.decode('-utf-8'))
+    elif(str(msg.topic[-7:]) == "setname"):
+        mqtt_client_aws.publish(str(msg.topic[-29:]), (msg.payload).decode('utf-8'), retain=True)
+
 
 
 mqtt_client_aws = mqtt.Client()
