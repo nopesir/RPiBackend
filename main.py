@@ -354,8 +354,8 @@ def on_message(mqtt_client, obj, msg):
         mqtt_client.publish("local/" + str(msg.topic), (msg.payload).decode('utf-8'), retain=False)
 
     shadow['state']['reported'] = esps
-    mqtt_client.publish(
-        "local/things/RaspberryPi/shadow/update", json.dumps(shadow), qos=1)
+    mqtt_client.publish("local/things/RaspberryPi/shadow/update", json.dumps(shadow), qos=1)
+
 
 
 
@@ -393,9 +393,14 @@ mqtt_client_aws.on_message = on_message_aws
 mqtt_client_aws.connect("localhost", 1883)
 mqtt_client_aws.loop_start()
 
+
+def get_mqtt():
+  threading.Timer(5.0, get_mqtt).start()
+  mqtt_client_aws.publish("local/rpi/wifi/get", json.dumps(wificheck), qos=1)
+  mqtt_client_aws.publish("local/rpi/ssids/get", json.dumps(ssids), qos=1)
+  mqtt_client_aws.publish("local/rpi/chrono/get", json.dumps(chronos), qos=1)
+
 # Thread that checks if some schedule is set into the 'chronos' object
-
-
 def runsched():
     # Restart this fuction after 30 seconds
     threading.Timer(30.0, runsched).start()
@@ -474,6 +479,7 @@ def runsched():
                         print(" * Time to disable " + x['id'])
                         mqtt_client.publish(x['id'] + "/event/onoff", "off", retain=True)
 
+get_mqtt()
 
 if __name__ == "__main__":
     app.run(host='0.0.0.0')
