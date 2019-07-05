@@ -318,7 +318,7 @@ def on_message(mqtt_client, obj, msg):
             esps[str(msg.topic[:15])]['online'] = True
         else:
             esps[str(msg.topic[:15])]['online'] = False
-
+        mqtt_client.publish("local/" + str(msg.topic), (msg.payload).decode('utf-8'), retain=False)
     if(str(msg.topic[-7:]) == "setTemp"):
         
         mongoose = str(msg.topic[:15])
