@@ -378,12 +378,12 @@ def on_connect_aws(mqtt_client_aws, obj, flags, rc):
 def on_message_aws(mqtt_client_aws, obj, msg):
     if(str(msg.topic[-5:]) == "onoff"):
         print("ONOFF")
-        print(str(msg.topic[-18:])
-        print((msg.payload).decode('utf-8'))
-        mqtt_client_aws.publish(str(msg.topic[-18:], (msg.payload).decode('utf-8'), retain=True))
+        print(str(msg.topic[-18:]))
+        print(str(msg.payload))
+        mqtt_client_aws.publish(str(msg.topic[-18:], msg.payload, retain=True))
     elif(str(msg.topic[-7:]) == "setTemp"):
         print("SETTEMP")
-        mqtt_client_aws.publish(str(msg.topic[-20:], (msg.payload).decode('utf-8'), retain=True))
+        mqtt_client_aws.publish(str(msg.topic[-20:], msg.payload, retain=True))
     print("NOPE")
     print(msg.payload.decode('-utf-8'))
 
