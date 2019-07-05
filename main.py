@@ -276,21 +276,9 @@ def chrono_set():
     global chronos
     global chrono_elem
     if request.method == 'POST':
-        print(request.get_json())
-        
         j_post = request.get_json()
-        flag = False
-        for x in chronos:
-            if str(x['id']) == str(j_post['id']):
-                x['days'] = j_post['days']
-                x['enabled'] = j_post['enabled']
-                x['start'] = str(j_post['start'])
-                x['end'] = str(j_post['end'])
-                x['temp'] = j_post['temp']
-            else:
-                flag = True
-
-        if(flag or (not chronos)):
+        founds = [x for x in chronos if x['id'] is j_post['id']]
+        if(not founds):
             chrono_elem['id'] = str(j_post['id'])
             chrono_elem['days'] = j_post['days']
             chrono_elem['enabled'] = j_post['enabled']
@@ -298,6 +286,16 @@ def chrono_set():
             chrono_elem['end'] = str(j_post['end'])
             chrono_elem['temp'] = j_post['temp']
             chronos.append(chrono_elem)
+        else:
+            x = founds[0]
+
+            for n, i in enumerate(chronos):
+                if i['id'] == x['id']:
+                    chronos[n]['days'] = j_post['days']
+                    chronos[n]['enabled'] = j_post['enabled']
+                    chronos[n]['start'] = str(j_post['start'])
+                    chronos[n]['end'] = str(j_post['end'])
+                    chronos[n]['temp'] = j_post['temp']
         
         shadow['state']['reported']['chronos'] = chronos
         mqtt_client.publish(
