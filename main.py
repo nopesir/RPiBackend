@@ -275,19 +275,14 @@ def take_ssids():
 def chrono_set():
     global chronos
     global chrono_elem
+    temp = chrono_elem
     if request.method == 'POST':
         j_post = request.get_json()
         founds = []
         founds = [x for x in chronos if str(x['id']) in str(j_post['id'])]
         print(founds)
         if not founds:
-            chrono_elem['id'] = str(j_post['id'])
-            chrono_elem['days'] = j_post['days']
-            chrono_elem['enabled'] = j_post['enabled']
-            chrono_elem['start'] = str(j_post['start'])
-            chrono_elem['end'] = str(j_post['end'])
-            chrono_elem['temp'] = j_post['temp']
-            chronos.append(chrono_elem)
+            chronos.append(j_post)
         else:
             x = founds[0]
             for n, i in enumerate(chronos):
