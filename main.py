@@ -369,17 +369,17 @@ mqtt_client.loop_start()
 
 
 
-def on_connect_aws(mqtt_client, obj, flags, rc):
-    mqtt_client.subscribe("local/+/event/onoff", 1)
-    mqtt_client.subscribe("local/+/event/setTemp", 1)
+def on_connect_aws(mqtt_client_aws, obj, flags, rc):
+    mqtt_client_aws.subscribe("local/+/event/onoff", 1)
+    mqtt_client_aws.subscribe("local/+/event/setTemp", 1)
     print(" * MQTT from AWS Subscribed!")
 
 
-def on_message_aws(mqtt_client, obj, msg):
+def on_message_aws(mqtt_client_aws, obj, msg):
     if(str(msg.topic[-5:]) == "onoff"):
-        mqtt_client.publish(str(msg.topic[-18:], str(msg.payload), retain=True))
+        mqtt_client_aws.publish(str(msg.topic[-18:], str(msg.payload), retain=True))
     elif str(msg.topic[-7:]) == "setTemp":
-        mqtt_client.publish(str(msg.topic[-18:], str(msg.payload), retain=True))
+        mqtt_client_aws.publish(str(msg.topic[-18:], str(msg.payload), retain=True))
 
 
 
