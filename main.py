@@ -280,7 +280,7 @@ def chrono_set():
         founds = []
         founds = [x for x in chronos if str(x['id']) in str(j_post['id'])]
         print(founds)
-        if(not founds):
+        if not founds:
             chrono_elem['id'] = str(j_post['id'])
             chrono_elem['days'] = j_post['days']
             chrono_elem['enabled'] = j_post['enabled']
