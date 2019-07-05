@@ -290,7 +290,7 @@ def chrono_set():
                 flag = True
 
         if(flag or (not chronos)):
-            chronos.append(j_post)
+            chronos.append(json.loads(j_post))
         
         shadow['state']['reported']['chronos'] = chronos
         mqtt_client.publish(
