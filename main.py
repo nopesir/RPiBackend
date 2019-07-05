@@ -277,7 +277,7 @@ def chrono_set():
     global chrono_elem
     if request.method == 'POST':
         j_post = request.get_json()
-        founds = [x for x in chronos if x['id'] is j_post['id']]
+        founds = [x for x in chronos if x['id'] == j_post['id']]
         if(not founds):
             chrono_elem['id'] = str(j_post['id'])
             chrono_elem['days'] = j_post['days']
@@ -296,7 +296,6 @@ def chrono_set():
                     chronos[n]['start'] = str(j_post['start'])
                     chronos[n]['end'] = str(j_post['end'])
                     chronos[n]['temp'] = j_post['temp']
-            chronos = list({v['id']:v for v in chronos}.values())
         
         shadow['state']['reported']['chronos'] = chronos
         mqtt_client.publish("local/things/RaspberryPi/shadow/update", json.dumps(shadow), qos=1)
