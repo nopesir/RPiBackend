@@ -179,11 +179,6 @@ def connect():
     # Reset the object
     esps = {}
 
-    found = [x for x in getSSID.main() if ssid in x['Name']]
-    
-    if not found:
-        return jsonify(found)
-
     # Connect to the network to retrieve the IP
     set_new_network_wpa(ssid=ssid, password=passwd)
     time.sleep(3)
@@ -206,7 +201,6 @@ def connect():
 
     # For each Mongoose_XXXXXX
     for x in ssids:
-
         # Connect to it
         set_new_network_wpa(ssid=x['Name'], password="Mongoose")
         strin = " * Checking wifi..."
