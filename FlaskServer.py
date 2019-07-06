@@ -396,7 +396,7 @@ def on_message(mqtt_client, obj, msg):
 mqtt_client = mqtt.Client()
 mqtt_client.on_connect = on_connect
 mqtt_client.on_message = on_message
-mqtt_client.connect("localhost", 1883)
+mqtt_client.connect("localhost", 1884)
 mqtt_client.loop_start()
 
 
@@ -445,7 +445,7 @@ def on_message_aws(mqtt_client_aws, obj, msg):
 mqtt_client_aws = mqtt.Client()
 mqtt_client_aws.on_connect = on_connect_aws
 mqtt_client_aws.on_message = on_message_aws
-mqtt_client_aws.connect("localhost", 1883)
+mqtt_client_aws.connect("localhost", 1882)
 mqtt_client_aws.loop_start()
 
 
