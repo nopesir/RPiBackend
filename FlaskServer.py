@@ -227,8 +227,7 @@ def connect():
         r = requests.post('http://192.168.4.1/rpc/Config.Set', json=data)
         time.sleep(5)
         # POST the save and reboot command for Mongoose OS
-        r2 = requests.post(
-            'http://192.168.4.1/rpc/Config.Save', json={'reboot': True})
+        r2 = requests.post('http://192.168.4.1/rpc/Config.Save', json={'reboot': True})
 
     # At the end, connect to the network
     set_new_network_wpa(ssid=ssid, password=passwd)
