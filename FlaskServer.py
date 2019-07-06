@@ -179,15 +179,27 @@ def connect():
     # Reset the object
     esps = {}
 
+    found = [x for x in getSSID.main() if ssid in x['Name']]
+
+    if not found:
+        return jsonify(found)
+
     # Connect to the network to retrieve the IP
     set_new_network_wpa(ssid=ssid, password=passwd)
     time.sleep(3)
     strin = " * Checking wifi..."
+    i = 0
     while not check_wifi():
+        i += 1
         strin = strin + "."
-        time.sleep(3)
+        time.sleep(2)
         print(strin + "\r")
+        if i > 10:
+            break
         pass
+
+    if i > 10:
+        return jsonify(list())
 
     print(" * Master SSID: " + ssid)
 
@@ -295,8 +307,6 @@ def chrono_set():
         return jsonify(chronos)
 
 # MQTT callback after connection, here there are the subscribes
-
-
 def on_connect(mqtt_client, obj, flags, rc):
     mqtt_client.subscribe("+/event/state", 1)
     mqtt_client.subscribe("+/event/status", 1)
