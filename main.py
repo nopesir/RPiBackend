@@ -374,16 +374,40 @@ def on_connect_aws(mqtt_client_aws, obj, flags, rc):
     mqtt_client_aws.subscribe("local/+/event/onoff", 1)
     mqtt_client_aws.subscribe("local/+/event/setTemp", 1)
     mqtt_client_aws.subscribe("local/+/event/setname", 1)
+    mqtt_client_aws.subscribe("local/rpi/chrono/set", 1)
     print(" * MQTT from AWS Subscribed!")
 
 
 def on_message_aws(mqtt_client_aws, obj, msg):
+    global chronos
+    global chrono_elem
     if(str(msg.topic[-5:]) == "onoff"):
         mqtt_client_aws.publish(str(msg.topic[-27:]), (msg.payload).decode('utf-8'), retain=True)
     elif(str(msg.topic[-7:]) == "setTemp"):
         mqtt_client_aws.publish(str(msg.topic[-29:]), (msg.payload).decode('utf-8'), retain=True)
     elif(str(msg.topic[-7:]) == "setname"):
         mqtt_client_aws.publish(str(msg.topic[-29:]), (msg.payload).decode('utf-8'), retain=True)
+    elif(str(msg.topic[-3:]) == "set"):
+        temp = chrono_elem
+        j_post = (msg.payload).decode('utf-8')
+        founds = []
+        founds = [x for x in chronos if str(x['id']) in str(j_post['id'])]
+        print(founds)
+        if not founds:
+            chronos.append(j_post)
+        else:
+            x = founds[0]
+            for n, i in enumerate(chronos):
+                if i['id'] == x['id']:
+                    chronos[n]['days'] = j_post['days']
+                    chronos[n]['enabled'] = j_post['enabled']
+                    chronos[n]['start'] = str(j_post['start'])
+                    chronos[n]['end'] = str(j_post['end'])
+                    chronos[n]['temp'] = j_post['temp']
+        
+        shadow['state']['reported']['chronos'] = chronos
+        mqtt_client.publish("local/things/RaspberryPi/shadow/update", json.dumps(shadow), qos=1)
+
 
 
 
