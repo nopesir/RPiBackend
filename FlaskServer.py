@@ -67,6 +67,8 @@ chrono_elem = {
 }
 
 
+res = []
+
 ssids = []
 
 
@@ -277,12 +279,23 @@ def take_ssids():
 
 @application.route("/graphs", methods=['GET'])
 def take_graph():
+    global res
     conn = sqlite3.connect('/home/pi/local.db')
     c = conn.cursor()
     c.execute("""SELECT * FROM measured""")
     conn.commit()
-    res = c.fetchall()
+    resu = c.fetchall()[0]
     conn.close()
+
+    listOfStr = ["id", "timestamp", "measured", "hum"]
+
+    res = []
+
+    for x in resu:
+        zipbObj = zipbObj = zip(listOfStr, x)
+        dictOfWords = dict(zipbObj)
+        res.append(dictOfWords)
+
     return jsonify(res)
 
 
