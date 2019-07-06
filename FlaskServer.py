@@ -284,7 +284,7 @@ def take_graph():
     c = conn.cursor()
     c.execute("""SELECT * FROM measured""")
     conn.commit()
-    resu = c.fetchall()[0]
+    resu = c.fetchall()
     conn.close()
 
     listOfStr = ["id", "timestamp", "measured", "hum"]
