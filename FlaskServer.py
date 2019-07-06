@@ -275,6 +275,18 @@ def take_ssids():
     return json.dumps(ssids)
 
 
+@application.route("/graphs", methods=['GET'])
+def take_graph():
+    conn = sqlite3.connect('/home/pi/local.db')
+    c = conn.cursor()
+    c.execute("""SELECT * FROM measured""")
+    conn.commit()
+    res = c.fetchall()
+    conn.close()
+    return jsonify(res)
+
+
+
 # Flask ENDPOINT:
 # POST to modify the settings for a specific Mongoose_XXXXXX
 # GET to retrieve all the settings of all the Mongoose_XXXXXX
@@ -282,7 +294,6 @@ def take_ssids():
 def chrono_set():
     global chronos
     global chrono_elem
-    temp = chrono_elem
     if request.method == 'POST':
         j_post = request.get_json()
         founds = []
@@ -508,7 +519,7 @@ def runsched():
                         print(" * Time to disable " + x['id'])
                         mqtt_client.publish(x['id'] + "/event/onoff", "off", retain=True)
 
-#get_mqtt()
+get_mqtt()
 
 if __name__ == "__main__":
     application.run(host='0.0.0.0')
