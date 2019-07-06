@@ -15,10 +15,10 @@ import socket
 import getSSID
 import paho.mqtt.client as mqtt
 
-app = Flask(__name__)
+application = Flask(__name__)
 
 # To resolve CORS error on Angular
-CORS(app)
+CORS(application)
 
 
 wificheck = {
@@ -166,7 +166,7 @@ def check_wifi():
     return res
 
 
-@app.route("/connect", methods=['GET'])
+@application.route("/connect", methods=['GET'])
 def connect():
     global ssids
 
@@ -256,14 +256,14 @@ def connect():
 
 # Flask ENDPOINT:
 # GET to retrieve the status of the WiFi connection
-@app.route("/wificheck", methods=['GET'])
+@application.route("/wificheck", methods=['GET'])
 def ret_wifi_status():
     check_wifi()
     return jsonify(wificheck)
 
 # Flask ENDPOINT:
 # GET to retrieve the Mongoose_XXXXXX correctly initialized bu the /connect
-@app.route("/ssids", methods=['GET'])
+@application.route("/ssids", methods=['GET'])
 def take_ssids():
     return json.dumps(ssids)
 
@@ -271,7 +271,7 @@ def take_ssids():
 # Flask ENDPOINT:
 # POST to modify the settings for a specific Mongoose_XXXXXX
 # GET to retrieve all the settings of all the Mongoose_XXXXXX
-@app.route("/chrono", methods=['POST', 'GET'])
+@application.route("/chrono", methods=['POST', 'GET'])
 def chrono_set():
     global chronos
     global chrono_elem
@@ -482,4 +482,4 @@ def runsched():
 get_mqtt()
 
 if __name__ == "__main__":
-    app.run(host='0.0.0.0')
+    application.run(host='0.0.0.0')
