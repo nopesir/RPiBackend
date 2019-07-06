@@ -140,10 +140,7 @@ def set_ap():
 
 
 def retrieve_ip():
-    return ([l for l in ([ip for ip in socket.gethostbyname_ex(socket.gethostname())[2]
-                          if not ip.startswith("127.")][:1], [[(s.connect(('8.8.8.8', 53)),
-                                                                s.getsockname()[0], s.close()) for s in [socket.socket(socket.AF_INET,
-                                                                                                                       socket.SOCK_DGRAM)]][0][1]]) if l][0][0])
+    return ([l for l in ([ip for ip in socket.gethostbyname_ex(socket.gethostname())[2] if not ip.startswith("127.")][:1], [[(s.connect(('8.8.8.8', 53)),s.getsockname()[0], s.close()) for s in [socket.socket(socket.AF_INET, socket.SOCK_DGRAM)]][0][1]]) if l][0][0])
 
 
 # Function used to check the WiFi status
@@ -165,24 +162,6 @@ def check_wifi():
 
     return res
 
-# Function used to check the WiFi status
-def check_wifi_two():
-    res = False
-    try:
-        # run 'sudo iwgetid -r' into the bash
-        out2 = subprocess.check_output(["sudo", "iwgetid", "-r"])
-        wificheck['online'] = True
-        wificheck['ssid'] = re.sub('\\n', '', out2.decode('utf-8'))
-        wificheck['ip'] = retrieve_ip()
-        res = True
-
-    except subprocess.CalledProcessError as e:
-        wificheck['online'] = False
-        wificheck['ssid'] = "none"
-        wificheck['ip'] = "none"
-        res = False
-
-    return res
 
 @application.route("/connect", methods=['GET'])
 def connect():
@@ -280,7 +259,7 @@ def connect():
 # GET to retrieve the status of the WiFi connection
 @application.route("/wificheck", methods=['GET'])
 def ret_wifi_status():
-    check_wifi_two()
+    check_wifi()
     return jsonify(wificheck)
 
 # Flask ENDPOINT:
