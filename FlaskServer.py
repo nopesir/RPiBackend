@@ -165,6 +165,24 @@ def check_wifi():
 
     return res
 
+# Function used to check the WiFi status
+def check_wifi_two():
+    res = False
+    try:
+        # run 'sudo iwgetid -r' into the bash
+        out2 = subprocess.check_output(["sudo", "iwgetid", "-r"])
+        wificheck['online'] = True
+        wificheck['ssid'] = re.sub('\\n', '', out2.decode('utf-8'))
+        wificheck['ip'] = retrieve_ip()
+        res = True
+
+    except subprocess.CalledProcessError as e:
+        wificheck['online'] = False
+        wificheck['ssid'] = "none"
+        wificheck['ip'] = "none"
+        res = False
+
+    return res
 
 @application.route("/connect", methods=['GET'])
 def connect():
@@ -262,7 +280,7 @@ def connect():
 # GET to retrieve the status of the WiFi connection
 @application.route("/wificheck", methods=['GET'])
 def ret_wifi_status():
-    check_wifi()
+    check_wifi_two()
     return jsonify(wificheck)
 
 # Flask ENDPOINT:
