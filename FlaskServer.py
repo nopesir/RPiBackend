@@ -534,7 +534,7 @@ def runsched():
                         print(" * Time to disable " + x['id'])
                         mqtt_client.publish(x['id'] + "/event/onoff", "off", retain=True)
 
-get_mqtt()
+#get_mqtt()
 
 if __name__ == "__main__":
     application.run(host='0.0.0.0')
