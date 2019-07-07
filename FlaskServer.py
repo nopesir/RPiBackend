@@ -365,13 +365,14 @@ def on_connect(mqtt_client, obj, flags, rc):
 def on_message(mqtt_client, obj, msg):
     global esps
     global ssids
+    global shadow
     if(str(msg.topic[-6:]) == "status"):
         if((msg.payload).decode('utf-8') == "online"):
             esps[str(msg.topic[:15])]['online'] = True
         else:
             esps[str(msg.topic[:15])]['online'] = False
         mqtt_client.publish("local/" + str(msg.topic), (msg.payload).decode('utf-8'), retain=False)
-    if(str(msg.topic[-7:]) == "setTemp"):
+    elif(str(msg.topic[-7:]) == "setTemp"):
         
         mongoose = str(msg.topic[:15])
         value = (msg.payload).decode('utf-8')
@@ -404,7 +405,7 @@ def on_message(mqtt_client, obj, msg):
         conn.commit()
         conn.close()
         mqtt_client.publish("local/" + str(msg.topic), (msg.payload).decode('utf-8'), retain=False)
-
+    
     shadow['state']['reported'] = esps
     mqtt_client.publish("local/things/RaspberryPi/shadow/update", json.dumps(shadow), qos=1)
 
