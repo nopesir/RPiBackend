@@ -118,6 +118,7 @@ def set_sta():
         f.close()
         time.sleep(1.0)
         set_new_network_wpa("DEFAULT", '')
+        return jsonify({"result": True})
 
 
 @application.route("/toap", methods=['GET'])
@@ -140,6 +141,7 @@ def set_ap():
         f.close()
         time.sleep(1.0)
         subprocess.run("sudo ./toAP.sh", shell=True, check=True)
+        return jsonify({"result": True})
 
 # Take the local IP of the raspberry
 # in order to send it to the Mongoose_XXXXXX
