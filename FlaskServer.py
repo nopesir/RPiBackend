@@ -125,6 +125,7 @@ def set_sta():
                 time.sleep(1.0)
                 # For debug
                 set_new_network_wpa("Giggino", "ciaone77")
+                apsta = not apsta
                 return jsonify({"result": True})
         else:
             return jsonify({"result": False})
@@ -155,6 +156,7 @@ def set_ap():
                 f.close()
                 time.sleep(1.0)
                 subprocess.run("sudo ./toAP.sh", shell=True, check=True)
+                apsta = not apsta
                 return jsonify({"result": True})
         else:
             return jsonify({"result": False})
