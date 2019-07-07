@@ -369,16 +369,36 @@ def take_graph():
     resu = c.fetchall()
     conn.close()
 
+    conn = sqlite3.connect('/home/pi/local.db')
+    d = conn.cursor()
+    d.execute("""SELECT * FROM desired""")
+    conn.commit()
+    resu_b = d.fetchall()
+    conn.close()
+
     listOfStr = ["id", "timestamp", "measured", "hum"]
+    listOfStr_b = ["id", "timestamp", "desired"]
+
+
 
     res = []
+    res_b = []
 
     for x in resu:
-        zipbObj = zipbObj = zip(listOfStr, x)
+        zipbObj = zip(listOfStr, x)
         dictOfWords = dict(zipbObj)
         res.append(dictOfWords)
 
-    return jsonify(res)
+    for y in resu_b:
+        zipbObj_b = zip(listOfStr_b, x)
+        dictOfWords_b = dict(zipbObj_b)
+        res_b.append(dictOfWords_b)
+
+    res_tot = []
+    res_tot.append(res)
+    res_tot.append(res_b)
+
+    return jsonify(res_tot)
 
 
 
