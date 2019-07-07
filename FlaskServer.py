@@ -72,7 +72,7 @@ ssids = []
 apsta = True
 
 # Clear all stored messages on MosquittoDB
-subprocess.run("sudo ./clearDB.sh", shell=True, check=True)
+subprocess.run("sudo ~/devs/FlaskServer/clearDB.sh", shell=True, check=True)
 
 time.sleep(5)
 
@@ -98,7 +98,7 @@ def set_new_network_wpa(ssid, password):
         f.close()
         bashCommand = "sudo wpa_cli -i wlan0 reconfigure"
         process = subprocess.Popen(bashCommand.split(), stdout=subprocess.PIPE)
-        subprocess.run("sudo ./toSTA.sh", shell=True, check=True)
+        subprocess.run("sudo ~/devs/FlaskServer/toSTA.sh", shell=True, check=True)
 
 
 @application.route("/tosta", methods=['GET'])
@@ -155,7 +155,7 @@ def set_ap():
                 f.write('denyinterfaces eth0\n')
                 f.close()
                 time.sleep(1.0)
-                subprocess.run("sudo ./toAP.sh", shell=True, check=True)
+                subprocess.run("sudo ~/devs/FlaskServer/toAP.sh", shell=True, check=True)
                 apsta = not apsta
                 return jsonify({"result": True})
         else:
@@ -203,7 +203,7 @@ def connect():
         mqtt_client.publish("local/things/RaspberryPi/shadow/delete", qos=1)
 
         # Clear all stored messages on MosquittoDB
-        subprocess.run("sudo ./clearDB.sh", shell=True, check=True)
+        subprocess.run("sudo ~/devs/FlaskServer/clearDB.sh", shell=True, check=True)
 
         found = [x for x in getSSID.main() if ssid in x['Name']]
 
