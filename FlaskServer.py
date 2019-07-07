@@ -72,7 +72,10 @@ res = []
 ssids = []
 
 # Clear all stored messages on MosquittoDB
-#subprocess.run("sudo ./clearDB.sh", shell=True, check=True)
+subprocess.run("sudo ./clearDB.sh", shell=True, check=True)
+
+
+time.sleep(5)
 
 esps = dict()
 
