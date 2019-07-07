@@ -98,6 +98,7 @@ def set_new_network_wpa(ssid, password):
         subprocess.run("sudo ./toSTA.sh", shell=True, check=True)
 
 
+@application.route("/tosta", methods=['GET'])
 def set_sta():
     with open('/etc/dhcpcd.conf', 'w') as f:
         f.write('hostname\n\n')
@@ -116,9 +117,10 @@ def set_sta():
         f.write('#denyinterfaces eth0\n')
         f.close()
         time.sleep(1.0)
-        subprocess.run("./toSTA.sh", shell=True, check=True)
+        set_new_network_wpa("DEFAULT", '')
 
 
+@application.route("/toap", methods=['GET'])
 def set_ap():
     with open('/etc/dhcpcd.conf', 'w') as f:
         f.write('hostname\n\n')
@@ -137,7 +139,7 @@ def set_ap():
         f.write('denyinterfaces eth0\n')
         f.close()
         time.sleep(1.0)
-        subprocess.run("./toAP.sh", shell=True, check=True)
+        subprocess.run("sudo ./toAP.sh", shell=True, check=True)
 
 # Take the local IP of the raspberry
 # in order to send it to the Mongoose_XXXXXX
