@@ -100,51 +100,55 @@ def set_new_network_wpa(ssid, password):
 
 @application.route("/tosta", methods=['GET'])
 def set_sta():
-    print("Request from %s" % request.host)
-    with open('/etc/dhcpcd.conf', 'w') as f:
-        f.write('hostname\n\n')
-        f.write('clientid\n\n')
-        f.write('persistent\n\n')
-        f.write('option rapid_commit\n\n')
-        f.write('option domain_name_servers, domain_name, domain_search, host_name\n\n')
-        f.write('option classless_static_routes\n\n')
-        f.write('option ntp_servers\n\n')
-        f.write('option interface_mtu\n\n')
-        f.write('require dhcp_server_identifier\n\n')
-        f.write('slaac private\n\n')
-        f.write('#interface wlan0\n')
-        f.write('#static ip_address=192.168.0.1/24\n')
-        f.write('#denyinterfaces wlan0\n')
-        f.write('#denyinterfaces eth0\n')
-        f.close()
-        time.sleep(1.0)
-        # For debug
-        set_new_network_wpa("Giggino", "ciaone77")
-        return jsonify({"result": True})
+    if(str(request.host == str("localhost:5000")) or str(request.host) == str("127.0.0.1:5000")):
+        with open('/etc/dhcpcd.conf', 'w') as f:
+            f.write('hostname\n\n')
+            f.write('clientid\n\n')
+            f.write('persistent\n\n')
+            f.write('option rapid_commit\n\n')
+            f.write('option domain_name_servers, domain_name, domain_search, host_name\n\n')
+            f.write('option classless_static_routes\n\n')
+            f.write('option ntp_servers\n\n')
+            f.write('option interface_mtu\n\n')
+            f.write('require dhcp_server_identifier\n\n')
+            f.write('slaac private\n\n')
+            f.write('#interface wlan0\n')
+            f.write('#static ip_address=192.168.0.1/24\n')
+            f.write('#denyinterfaces wlan0\n')
+            f.write('#denyinterfaces eth0\n')
+            f.close()
+            time.sleep(1.0)
+            # For debug
+            set_new_network_wpa("Giggino", "ciaone77")
+            return jsonify({"result": True})
+    else:
+        return jsonify({"result": False})
 
 
 @application.route("/toap", methods=['GET'])
 def set_ap():
-    print("Request from %s" % request.host)
-    with open('/etc/dhcpcd.conf', 'w') as f:
-        f.write('hostname\n\n')
-        f.write('clientid\n\n')
-        f.write('persistent\n\n')
-        f.write('option rapid_commit\n\n')
-        f.write('option domain_name_servers, domain_name, domain_search, host_name\n\n')
-        f.write('option classless_static_routes\n\n')
-        f.write('option ntp_servers\n\n')
-        f.write('option interface_mtu\n\n')
-        f.write('require dhcp_server_identifier\n\n')
-        f.write('slaac private\n\n')
-        f.write('interface wlan0\n')
-        f.write('static ip_address=192.168.11.1/24\n')
-        f.write('denyinterfaces wlan0\n')
-        f.write('denyinterfaces eth0\n')
-        f.close()
-        time.sleep(1.0)
-        subprocess.run("sudo ./toAP.sh", shell=True, check=True)
-        return jsonify({"result": True})
+    if(str(request.host == str("localhost:5000")) or str(request.host) == str("127.0.0.1:5000")):
+        with open('/etc/dhcpcd.conf', 'w') as f:
+            f.write('hostname\n\n')
+            f.write('clientid\n\n')
+            f.write('persistent\n\n')
+            f.write('option rapid_commit\n\n')
+            f.write('option domain_name_servers, domain_name, domain_search, host_name\n\n')
+            f.write('option classless_static_routes\n\n')
+            f.write('option ntp_servers\n\n')
+            f.write('option interface_mtu\n\n')
+            f.write('require dhcp_server_identifier\n\n')
+            f.write('slaac private\n\n')
+            f.write('interface wlan0\n')
+            f.write('static ip_address=192.168.11.1/24\n')
+            f.write('denyinterfaces wlan0\n')
+            f.write('denyinterfaces eth0\n')
+            f.close()
+            time.sleep(1.0)
+            subprocess.run("sudo ./toAP.sh", shell=True, check=True)
+            return jsonify({"result": True})
+    else:
+        return jsonify({"result": False})
 
 # Take the local IP of the raspberry
 # in order to send it to the Mongoose_XXXXXX
