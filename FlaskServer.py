@@ -117,7 +117,8 @@ def set_sta():
         f.write('#denyinterfaces eth0\n')
         f.close()
         time.sleep(1.0)
-        set_new_network_wpa("DEFAULT", '')
+        # For debug
+        set_new_network_wpa("Giggino", "ciaone77")
         return jsonify({"result": True})
 
 
