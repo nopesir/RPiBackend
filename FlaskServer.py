@@ -68,14 +68,14 @@ chrono_elem = {
 
 
 res = []
-
 ssids = []
+apsta = True
 
 # Clear all stored messages on MosquittoDB
 subprocess.run("sudo ./clearDB.sh", shell=True, check=True)
 
-
 time.sleep(5)
+
 
 esps = dict()
 
@@ -103,55 +103,63 @@ def set_new_network_wpa(ssid, password):
 
 @application.route("/tosta", methods=['GET'])
 def set_sta():
-    if("localhost" in str(request.host)):
-        with open('/etc/dhcpcd.conf', 'w') as f:
-            f.write('hostname\n\n')
-            f.write('clientid\n\n')
-            f.write('persistent\n\n')
-            f.write('option rapid_commit\n\n')
-            f.write('option domain_name_servers, domain_name, domain_search, host_name\n\n')
-            f.write('option classless_static_routes\n\n')
-            f.write('option ntp_servers\n\n')
-            f.write('option interface_mtu\n\n')
-            f.write('require dhcp_server_identifier\n\n')
-            f.write('slaac private\n\n')
-            f.write('#interface wlan0\n')
-            f.write('#static ip_address=192.168.0.1/24\n')
-            f.write('#denyinterfaces wlan0\n')
-            f.write('#denyinterfaces eth0\n')
-            f.close()
-            time.sleep(1.0)
-            # For debug
-            set_new_network_wpa("Giggino", "ciaone77")
-            return jsonify({"result": True})
+    global apsta
+    if (not apsta):
+        if("localhost" in str(request.host)):
+            with open('/etc/dhcpcd.conf', 'w') as f:
+                f.write('hostname\n\n')
+                f.write('clientid\n\n')
+                f.write('persistent\n\n')
+                f.write('option rapid_commit\n\n')
+                f.write('option domain_name_servers, domain_name, domain_search, host_name\n\n')
+                f.write('option classless_static_routes\n\n')
+                f.write('option ntp_servers\n\n')
+                f.write('option interface_mtu\n\n')
+                f.write('require dhcp_server_identifier\n\n')
+                f.write('slaac private\n\n')
+                f.write('#interface wlan0\n')
+                f.write('#static ip_address=192.168.0.1/24\n')
+                f.write('#denyinterfaces wlan0\n')
+                f.write('#denyinterfaces eth0\n')
+                f.close()
+                time.sleep(1.0)
+                # For debug
+                set_new_network_wpa("Giggino", "ciaone77")
+                return jsonify({"result": True})
+        else:
+            return jsonify({"result": False})
     else:
-        return jsonify({"result": False})
+        return jsonify({"result": "Already in STA"})
 
 
 @application.route("/toap", methods=['GET'])
 def set_ap():
-    if("localhost" in str(request.host)):
-        with open('/etc/dhcpcd.conf', 'w') as f:
-            f.write('hostname\n\n')
-            f.write('clientid\n\n')
-            f.write('persistent\n\n')
-            f.write('option rapid_commit\n\n')
-            f.write('option domain_name_servers, domain_name, domain_search, host_name\n\n')
-            f.write('option classless_static_routes\n\n')
-            f.write('option ntp_servers\n\n')
-            f.write('option interface_mtu\n\n')
-            f.write('require dhcp_server_identifier\n\n')
-            f.write('slaac private\n\n')
-            f.write('interface wlan0\n')
-            f.write('static ip_address=192.168.11.1/24\n')
-            f.write('denyinterfaces wlan0\n')
-            f.write('denyinterfaces eth0\n')
-            f.close()
-            time.sleep(1.0)
-            subprocess.run("sudo ./toAP.sh", shell=True, check=True)
-            return jsonify({"result": True})
+    global apsta
+    if(apsta):
+        if("localhost" in str(request.host)):
+            with open('/etc/dhcpcd.conf', 'w') as f:
+                f.write('hostname\n\n')
+                f.write('clientid\n\n')
+                f.write('persistent\n\n')
+                f.write('option rapid_commit\n\n')
+                f.write('option domain_name_servers, domain_name, domain_search, host_name\n\n')
+                f.write('option classless_static_routes\n\n')
+                f.write('option ntp_servers\n\n')
+                f.write('option interface_mtu\n\n')
+                f.write('require dhcp_server_identifier\n\n')
+                f.write('slaac private\n\n')
+                f.write('interface wlan0\n')
+                f.write('static ip_address=192.168.11.1/24\n')
+                f.write('denyinterfaces wlan0\n')
+                f.write('denyinterfaces eth0\n')
+                f.close()
+                time.sleep(1.0)
+                subprocess.run("sudo ./toAP.sh", shell=True, check=True)
+                return jsonify({"result": True})
+        else:
+            return jsonify({"result": False})
     else:
-        return jsonify({"result": False})
+        return jsonify({"result": "Already in AP"})
 
 # Take the local IP of the raspberry
 # in order to send it to the Mongoose_XXXXXX
@@ -184,100 +192,99 @@ def check_wifi():
 @application.route("/connect", methods=['GET'])
 def connect():
     global ssids
+    if("localhost" in str(request.host)):
 
-    ssid = request.args.get('ssid')
-    passwd = request.args.get('passwd')
+        ssid = request.args.get('ssid')
+        passwd = request.args.get('passwd')
 
-    # Delete shadow state on Amazon AWS
-    mqtt_client.publish("local/things/RaspberryPi/shadow/delete", qos=1)
+        # Delete shadow state on Amazon AWS
+        mqtt_client.publish("local/things/RaspberryPi/shadow/delete", qos=1)
 
-    # Clear all stored messages on MosquittoDB
-    subprocess.run("sudo ./clearDB.sh", shell=True, check=True)
+        # Clear all stored messages on MosquittoDB
+        subprocess.run("sudo ./clearDB.sh", shell=True, check=True)
 
-    # Reset the object
-    esps = {}
+        found = [x for x in getSSID.main() if ssid in x['Name']]
 
-    found = [x for x in getSSID.main() if ssid in x['Name']]
+        if not found:
+            return jsonify(found)
 
-    if not found:
-        return jsonify(found)
-
-    # Connect to the network to retrieve the IP
-    set_new_network_wpa(ssid=ssid, password=passwd)
-    time.sleep(3)
-    strin = " * Checking wifi..."
-    i = 0
-    while not check_wifi():
-        i += 1
-        strin = strin + "."
-        time.sleep(2)
-        print(strin + "\r")
-        if i > 10:
-            break
-        pass
-
-    if i > 10:
-        return jsonify(list())
-
-    print(" * Master SSID: " + ssid)
-
-    # Search for networks and filter by SSIDs that starts with "Mongoose_"
-    ssids = [x for x in getSSID.main() if "Mongoose_" in x['Name']]
-
-    # Save the data to be sent to the ESPs
-    data['config']['wifi']['sta']['ssid'] = ssid
-    data['config']['wifi']['sta']['pass'] = passwd
-    data['config']['mqtt']['server'] = retrieve_ip()
-
-    # For each Mongoose_XXXXXX
-    for x in ssids:
-        # Connect to it
-        set_new_network_wpa(ssid=x['Name'], password="Mongoose")
+        # Connect to the network to retrieve the IP
+        set_new_network_wpa(ssid=ssid, password=passwd)
+        time.sleep(3)
         strin = " * Checking wifi..."
+        i = 0
+        while not check_wifi():
+            i += 1
+            strin = strin + "."
+            time.sleep(2)
+            print(strin + "\r")
+            if i > 10:
+                break
+            pass
+
+        if i > 10:
+            return jsonify({"result": False})
+
+        print(" * Master SSID: " + ssid)
+
+        # Search for networks and filter by SSIDs that starts with "Mongoose_"
+        ssids = [x for x in getSSID.main() if "Mongoose_" in x['Name']]
+
+        # Save the data to be sent to the ESPs
+        data['config']['wifi']['sta']['ssid'] = ssid
+        data['config']['wifi']['sta']['pass'] = passwd
+        data['config']['mqtt']['server'] = retrieve_ip()
+
+        # For each Mongoose_XXXXXX
+        for x in ssids:
+            # Connect to it
+            set_new_network_wpa(ssid=x['Name'], password="Mongoose")
+            strin = " * Checking wifi..."
+
+            # Wait for the connection
+            while not check_wifi():
+                strin = strin + "."
+                time.sleep(3)
+                print(strin + "\r")
+                pass
+
+            print(" * Configuring " + x['Name'] + "...")
+
+            # POST the data to Mongoose OS with IP, SSID, PASS
+            r = requests.post('http://192.168.4.1/rpc/Config.Set', json=data)
+            time.sleep(5)
+            # POST the save and reboot command for Mongoose OS
+            r2 = requests.post('http://192.168.4.1/rpc/Config.Save', json={'reboot': True})
+
+        # At the end, connect to the network
+        set_new_network_wpa(ssid=ssid, password=passwd)
+
+        time.sleep(3)
 
         # Wait for the connection
         while not check_wifi():
-            strin = strin + "."
-            time.sleep(3)
-            print(strin + "\r")
+            time.sleep(2)
             pass
 
-        print(" * Configuring " + x['Name'] + "...")
+        print(" * Connected to " + ssid + " and ready!")
 
-        # POST the data to Mongoose OS with IP, SSID, PASS
-        r = requests.post('http://192.168.4.1/rpc/Config.Set', json=data)
-        time.sleep(5)
-        # POST the save and reboot command for Mongoose OS
-        r2 = requests.post('http://192.168.4.1/rpc/Config.Save', json={'reboot': True})
+        # Take the ids of every connected device in order to check for time scheduling
+        for x in ssids:
+            temp = {}
+            temp = chrono_elem.copy()
+            temp['id'] = x['Name']
+            chronos.append(temp)
 
-    # At the end, connect to the network
-    set_new_network_wpa(ssid=ssid, password=passwd)
+        # Transform the JSON into a string
+        resp = json.dumps(ssids)
 
-    time.sleep(3)
+        # Start the scheduling thread
+        runsched()
 
-    # Wait for the connection
-    while not check_wifi():
-        time.sleep(2)
-        pass
-
-    print(" * Connected to " + ssid + " and ready!")
-
-    # Take the ids of every connected device in order to check for time scheduling
-    for x in ssids:
-        temp = {}
-        temp = chrono_elem.copy()
-        temp['id'] = x['Name']
-        chronos.append(temp)
-
-    # Transform the JSON into a string
-    resp = json.dumps(ssids)
-
-    # Start the scheduling thread
-    runsched()
-
-    # Return the correctly connected devices as a vector of dict
-    return resp
-
+        # Return the correctly connected devices as a vector of dict
+        return resp
+    else:
+        return jsonify([])
 
 # Flask ENDPOINT:
 # GET to retrieve the status of the WiFi connection
