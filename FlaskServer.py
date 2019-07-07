@@ -400,7 +400,7 @@ def take_graph():
         res.append(dictOfWords)
 
     for y in resu_b:
-        zipbObj_b = zip(listOfStr_b, x)
+        zipbObj_b = zip(listOfStr_b, y)
         dictOfWords_b = dict(zipbObj_b)
         res_b.append(dictOfWords_b)
 
