@@ -104,7 +104,7 @@ def set_new_network_wpa(ssid, password):
 
 
 @application.route("/tosta", methods=['GET'])
-def set_sta():
+def set_sta(sssssi='', passss=''):
     global apsta
     if (not apsta):
         if("localhost" in str(request.host)):
@@ -126,7 +126,7 @@ def set_sta():
                 f.close()
                 time.sleep(1.0)
                 # For debug
-                set_new_network_wpa("Giggino", "ciaone77")
+                set_new_network_wpa(sssssi, passss)
                 apsta = not apsta
                 with open('/home/pi/devs/FlaskServer/save.txt', 'w') as f:
                     f.write(str(apsta))
@@ -262,14 +262,24 @@ def connect():
         # Clear all stored messages on MosquittoDB
         subprocess.run("sudo /home/pi/devs/FlaskServer/clearDB.sh", shell=True, check=True)
 
+        time.sleep(3)
+
+        
+
+
         found = [x for x in getSSID.main() if ssid in x['Name']]
 
         if not found:
             return jsonify(found)
 
         # Connect to the network to retrieve the IP
-        set_new_network_wpa(ssid=ssid, password=passwd)
-        time.sleep(3)
+        if(not apsta):
+            set_sta(ssid, passwd)
+        else:
+            set_new_network_wpa(ssid=ssid, password=passwd)
+        
+        time.sleep(4)
+
         strin = " * Checking wifi..."
         i = 0
         while not check_wifi():
@@ -303,7 +313,7 @@ def connect():
             # Wait for the connection
             while not check_wifi():
                 strin = strin + "."
-                time.sleep(3)
+                time.sleep(2)
                 print(strin + "\r")
                 pass
 
