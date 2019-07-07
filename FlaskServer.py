@@ -100,7 +100,7 @@ def set_new_network_wpa(ssid, password):
 
 @application.route("/tosta", methods=['GET'])
 def set_sta():
-    if(str(request.host == str("localhost:5000")) or str(request.host) == str("127.0.0.1:5000")):
+    if("localhost" in str(request.host)):
         with open('/etc/dhcpcd.conf', 'w') as f:
             f.write('hostname\n\n')
             f.write('clientid\n\n')
@@ -127,7 +127,7 @@ def set_sta():
 
 @application.route("/toap", methods=['GET'])
 def set_ap():
-    if(str(request.host == str("localhost:5000")) or str(request.host) == str("127.0.0.1:5000")):
+    if("localhost" in str(request.host)):
         with open('/etc/dhcpcd.conf', 'w') as f:
             f.write('hostname\n\n')
             f.write('clientid\n\n')
