@@ -47,6 +47,12 @@ shadow = {
     }
 }
 
+config = {
+    'ssid': "ssid",
+    'password': "pass",
+    'ip': "127.0.0.1",
+    'apsta': True 
+}
 
 chronos = []
 
@@ -230,13 +236,17 @@ def retrieve_ip():
 
 # Function used to check the WiFi status
 def check_wifi():
+    global config
+    
     res = False
+
     try:
         # run 'sudo iwgetid -r' into the bash
         out2 = subprocess.check_output(["sudo", "iwgetid", "-r"])
         wificheck['online'] = True
         wificheck['ssid'] = re.sub('\\n', '', out2.decode('utf-8'))
         wificheck['ip'] = retrieve_ip()
+        config['ip'] = wificheck['ip']
         res = True
 
     except subprocess.CalledProcessError as e:
@@ -251,6 +261,7 @@ def check_wifi():
 @application.route("/connect", methods=['GET'])
 def connect():
     global ssids
+    global chronos
     if("localhost" in str(request.host)):
 
         ssid = request.args.get('ssid')
@@ -328,6 +339,8 @@ def connect():
         # At the end, connect to the network
         set_new_network_wpa(ssid=ssid, password=passwd)
 
+        
+
         time.sleep(3)
 
         # Wait for the connection
@@ -336,13 +349,23 @@ def connect():
             pass
 
         print(" * Connected to " + ssid + " and ready!")
+        config['ssid'] = ssid
+        config['pass'] = passwd
+        config['apsta'] = apsta
 
         # Take the ids of every connected device in order to check for time scheduling
+        chronos = {}
         for x in ssids:
             temp = {}
             temp = chrono_elem.copy()
-            temp['id'] = x['Name']
-            chronos.append(temp)
+            if (str(temp['id']) == str(x['Name'])):
+                pass
+            else:
+                chronos.append(temp)
+
+        config['chonos'] = chronos
+
+        upload_config(config)
 
         # Transform the JSON into a string
         resp = json.dumps(ssids)
@@ -437,6 +460,8 @@ def chrono_set():
                     chronos[n]['temp'] = j_post['temp']
         
         shadow['state']['reported']['chronos'] = chronos
+        config['chonos'] = chronos
+        upload_config(config)
         mqtt_client.publish("local/things/RaspberryPi/shadow/update", json.dumps(shadow), qos=1)
         return jsonify({"result": True})
     else:
@@ -455,6 +480,7 @@ def on_message(mqtt_client, obj, msg):
     global esps
     global ssids
     global shadow
+    global config
     if(str(msg.topic[-6:]) == "status"):
         if((msg.payload).decode('utf-8') == "online"):
             esps[str(msg.topic[:15])]['online'] = True
@@ -496,6 +522,8 @@ def on_message(mqtt_client, obj, msg):
         mqtt_client.publish("local/" + str(msg.topic), (msg.payload).decode('utf-8'), retain=False)
     
     shadow['state']['reported'] = esps
+    config['esps'] = esps
+    upload_config(config)
     mqtt_client.publish("local/things/RaspberryPi/shadow/update", json.dumps(shadow), qos=1)
 
 
@@ -565,6 +593,39 @@ def get_mqtt():
   mqtt_client_aws.publish("local/rpi/wifi/get", json.dumps(wificheck), qos=1)
   mqtt_client_aws.publish("local/rpi/ssids/get", json.dumps(ssids), qos=1)
   mqtt_client_aws.publish("local/rpi/chrono/get", json.dumps(chronos), qos=1)
+
+def upload_config(config):
+    data = {
+        'device mac': "D4:25:8B:D9:E7:2F", 
+        'nickname': "nopesir",
+        'configuration': {}
+    }
+    API_URI = "http://ec2-34-220-162-82.us-west-2.compute.amazonaws.com:5002/"
+    response = requests.post(API_URI+"auth", data=json.dumps({'username':'PL19-18', 'password':'raspbian'}), headers={'Content-Type': 'application/json'})
+    
+    if not json.loads(response.text)['access_token']:
+    	print("Could not obtain the API_TOKEN!")
+    	return None
+    
+    API_TOKEN = json.loads(response.text)['access_token']
+
+    data['configuration'] = config
+
+    response = requests.post(API_URI+"user/PL19-18/devices", data=json.dumps(data), headers={"Authorization": "JWT " + API_TOKEN, 'Content-Type': 'application/json'})
+
+def download_config():
+    API_URI = "http://ec2-34-220-162-82.us-west-2.compute.amazonaws.com:5002/"
+    response = requests.post(API_URI+"auth", data=json.dumps({'username':'PL19-18', 'password':'raspbian'}), headers={'Content-Type': 'application/json'})
+    
+    if not json.loads(response.text)['access_token']:
+    	print("Could not obtain the API_TOKEN!")
+    	return None
+    
+    API_TOKEN = json.loads(response.text)['access_token']
+
+    response = requests.get(API_URI+"user/PL19-18/devices", headers={"Authorization": "JWT " + API_TOKEN, 'Content-Type': 'application/json'})
+
+    return response.json()
 
 # Thread that checks if some schedule is set into the 'chronos' object
 def runsched():
