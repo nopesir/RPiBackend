@@ -442,6 +442,7 @@ def take_graph():
 @application.route("/chrono", methods=['POST', 'GET'])
 def chrono_set():
     global chronos
+    global wificheck
     global chrono_elem
     if request.method == 'POST':
         j_post = request.get_json()
@@ -461,8 +462,10 @@ def chrono_set():
                     chronos[n]['temp'] = j_post['temp']
         
         shadow['state']['reported']['chronos'] = chronos
+        
         config['chonos'] = chronos
-        upload_config(config)
+        if wificheck['online']:
+            upload_config(config)
         mqtt_client.publish("local/things/RaspberryPi/shadow/update", json.dumps(shadow), qos=1)
         return jsonify({"result": True})
     else:
