@@ -354,7 +354,7 @@ def connect():
         config['apsta'] = apsta
 
         # Take the ids of every connected device in order to check for time scheduling
-        chronos = {}
+        chronos = []
         for x in ssids:
             temp = {}
             temp = chrono_elem.copy()
@@ -611,6 +611,8 @@ def upload_config(config):
     	return None
     
     API_TOKEN = json.loads(response.text)['access_token']
+
+    print(API_TOKEN)
 
     data['configuration'] = config
 
