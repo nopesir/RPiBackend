@@ -602,10 +602,12 @@ def upload_config(config):
         'configuration': {}
     }
     API_URI = "http://ec2-34-220-162-82.us-west-2.compute.amazonaws.com:5002/"
-    if apsta:
+    
+    if wificheck['online']:
         response = requests.post(API_URI+"auth", data=json.dumps({'username':'PL19-18', 'password':'raspbian'}), headers={'Content-Type': 'application/json'})
     else:
         return None
+    
     if not json.loads(response.text)['access_token']:
     	print("Could not obtain the API_TOKEN!")
     	return None
@@ -615,6 +617,8 @@ def upload_config(config):
     print(API_TOKEN)
 
     data['configuration'] = config
+
+    print(data)
 
     response = requests.post(API_URI+"user/PL19-18/devices", data=json.dumps(data), headers={"Authorization": "JWT " + API_TOKEN, 'Content-Type': 'application/json'})
 
