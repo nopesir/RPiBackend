@@ -595,14 +595,17 @@ def get_mqtt():
   mqtt_client_aws.publish("local/rpi/chrono/get", json.dumps(chronos), qos=1)
 
 def upload_config(config):
+    global apsta
     data = {
         'device mac': "D4:25:8B:D9:E7:2F", 
         'nickname': "nopesir",
         'configuration': {}
     }
     API_URI = "http://ec2-34-220-162-82.us-west-2.compute.amazonaws.com:5002/"
-    response = requests.post(API_URI+"auth", data=json.dumps({'username':'PL19-18', 'password':'raspbian'}), headers={'Content-Type': 'application/json'})
-    
+    if apsta:
+        response = requests.post(API_URI+"auth", data=json.dumps({'username':'PL19-18', 'password':'raspbian'}), headers={'Content-Type': 'application/json'})
+    else:
+        return None
     if not json.loads(response.text)['access_token']:
     	print("Could not obtain the API_TOKEN!")
     	return None
