@@ -246,6 +246,7 @@ def check_wifi():
         wificheck['online'] = True
         wificheck['ssid'] = re.sub('\\n', '', out2.decode('utf-8'))
         wificheck['ip'] = retrieve_ip()
+        config['ssid'] = wificheck['ssid']
         config['ip'] = wificheck['ip']
         res = True
 
