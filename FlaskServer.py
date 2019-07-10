@@ -261,7 +261,7 @@ def check_wifi():
     return res
 
 
-def ap_security_switch(t):
+def ap_security_switch():
     global apsta
     global wificheck
     while True:
