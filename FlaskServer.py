@@ -351,6 +351,12 @@ def connect():
         config['pass'] = passwd
         config['apsta'] = apsta
 
+        for x in ssids:
+            temp = chrono_elem.copy()
+            temp['id'] = x['Name']
+            chronos.append(temp)
+
+
         config['chonos'] = chronos
 
         upload_config(config)
