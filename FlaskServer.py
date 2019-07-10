@@ -300,11 +300,11 @@ def connect():
 
         # Connect to the network to retrieve the IP
         if(not apsta):
-            set_sta(ssid, passwd)
+            set_sta_from_ap(ssid, passwd)
         else:
             set_new_network_wpa(ssid=ssid, password=passwd)
         
-        time.sleep(4)
+        time.sleep(3)
 
         strin = " * Checking wifi..."
         i = 0
@@ -775,6 +775,33 @@ def set_ap_recovery():
                 f.write(str(apsta))
                 f.close()
 
+
+def set_sta_from_ap(sssssi='', passss=''):
+    global apsta
+    if (not apsta):
+        with open('/etc/dhcpcd.conf', 'w') as f:
+            f.write('hostname\n\n')
+            f.write('clientid\n\n')
+            f.write('persistent\n\n')
+            f.write('option rapid_commit\n\n')
+            f.write('option domain_name_servers, domain_name, domain_search, host_name\n\n')
+            f.write('option classless_static_routes\n\n')
+            f.write('option ntp_servers\n\n')
+            f.write('option interface_mtu\n\n')
+            f.write('require dhcp_server_identifier\n\n')
+            f.write('slaac private\n\n')
+            f.write('#interface wlan0\n')
+            f.write('#static ip_address=192.168.0.1/24\n')
+            f.write('#denyinterfaces wlan0\n')
+            f.write('#denyinterfaces eth0\n')
+            f.close()
+            time.sleep(1.0)
+            # For debug
+            set_new_network_wpa(sssssi, passss)
+            apsta = not apsta
+            with open('/home/pi/devs/FlaskServer/save.txt', 'w') as f:
+                f.write(str(apsta))
+                f.close()
 
 
 if __name__ == "__main__":
