@@ -527,7 +527,8 @@ def on_message(mqtt_client, obj, msg):
     
     shadow['state']['reported'] = esps
     config['esps'] = esps
-    upload_config(config)
+    if wificheck['online']:
+        upload_config(config)
     mqtt_client.publish("local/things/RaspberryPi/shadow/update", json.dumps(shadow), qos=1)
 
 
@@ -554,6 +555,7 @@ def on_connect_aws(mqtt_client_aws, obj, flags, rc):
 
 def on_message_aws(mqtt_client_aws, obj, msg):
     global chronos
+    global wificheck
     global chrono_elem
     if(str(msg.topic[-5:]) == "onoff"):
         mqtt_client_aws.publish(str(msg.topic[-27:]), (msg.payload).decode('utf-8'), retain=True)
@@ -580,7 +582,12 @@ def on_message_aws(mqtt_client_aws, obj, msg):
                     chronos[n]['temp'] = j_post['temp']
         
         shadow['state']['reported']['chronos'] = chronos
+        config['chonos'] = chronos
+        if wificheck['online']:
+            upload_config(config)
+        
         mqtt_client.publish("local/things/RaspberryPi/shadow/update", json.dumps(shadow), qos=1)
+
 
 
 
@@ -593,10 +600,10 @@ mqtt_client_aws.loop_start()
 
 
 def get_mqtt():
-  threading.Timer(5.0, get_mqtt).start()
-  mqtt_client_aws.publish("local/rpi/wifi/get", json.dumps(wificheck), qos=1)
-  mqtt_client_aws.publish("local/rpi/ssids/get", json.dumps(ssids), qos=1)
-  mqtt_client_aws.publish("local/rpi/chrono/get", json.dumps(chronos), qos=1)
+    threading.Timer(5.0, get_mqtt).start()
+    mqtt_client_aws.publish("local/rpi/wifi/get", json.dumps(wificheck), qos=1)
+    mqtt_client_aws.publish("local/rpi/ssids/get", json.dumps(ssids), qos=1)
+    mqtt_client_aws.publish("local/rpi/chrono/get", json.dumps(chronos), qos=1)
 
 def upload_config(config):
     global apsta
@@ -625,10 +632,14 @@ def upload_config(config):
     response = requests.post(API_URI+"user/PL19-18/devices", data=json.dumps(data), headers={"Authorization": "JWT " + API_TOKEN, 'Content-Type': 'application/json'})
 
 def download_config():
+    global wificheck
     API_URI = "http://ec2-34-220-162-82.us-west-2.compute.amazonaws.com:5002/"
 
-    response = requests.post(API_URI+"auth", data=json.dumps({'username':'PL19-18', 'password':'raspbian'}), headers={'Content-Type': 'application/json'})
-    
+    if wificheck['online']:
+        response = requests.post(API_URI+"auth", data=json.dumps({'username':'PL19-18', 'password':'raspbian'}), headers={'Content-Type': 'application/json'})
+    else:
+        return {}
+
     if not json.loads(response.text)['access_token']:
     	print("Could not obtain the API_TOKEN!")
     	return None
