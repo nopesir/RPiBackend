@@ -169,7 +169,7 @@ if(path.exists('/home/pi/devs/FlaskServer/save.txt')):
             f.close()
             time.sleep(1.0)
             # For debug
-            set_new_network_wpa("Giggino", "ciaone77")
+            # set_new_network_wpa("Giggino", "ciaone77")
     else:
         apsta = False
         with open('/etc/dhcpcd.conf', 'w') as f:
