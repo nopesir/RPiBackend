@@ -466,6 +466,7 @@ def chrono_set():
         config['chonos'] = chronos
         if wificheck['online']:
             upload_config(config)
+        shadow['state']['reported']['wifi'] = wificheck
         mqtt_client.publish("local/things/RaspberryPi/shadow/update", json.dumps(shadow), qos=1)
         return jsonify({"result": True})
     else:
@@ -529,6 +530,7 @@ def on_message(mqtt_client, obj, msg):
     config['esps'] = esps
     if wificheck['online']:
         upload_config(config)
+    shadow['state']['reported']['wifi'] = wificheck
     mqtt_client.publish("local/things/RaspberryPi/shadow/update", json.dumps(shadow), qos=1)
 
 
@@ -585,7 +587,7 @@ def on_message_aws(mqtt_client_aws, obj, msg):
         config['chonos'] = chronos
         if wificheck['online']:
             upload_config(config)
-        
+        shadow['state']['reported']['wifi'] = wificheck
         mqtt_client.publish("local/things/RaspberryPi/shadow/update", json.dumps(shadow), qos=1)
 
 
