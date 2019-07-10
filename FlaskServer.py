@@ -237,7 +237,7 @@ def retrieve_ip():
 # Function used to check the WiFi status
 def check_wifi():
     global config
-    
+    global wificheck
     res = False
 
     try:
@@ -266,6 +266,7 @@ def ap_security_switch(t):
     global wificheck
     while True:
         if apsta:
+            print(' * Checking WiFi...')
             if not wificheck['online']:
                 set_ap()
                 return
