@@ -253,7 +253,9 @@ def check_wifi():
     except subprocess.CalledProcessError as e:
         wificheck['online'] = False
         wificheck['ssid'] = "none"
-        wificheck['ip'] = "none"
+        wificheck['ip'] = "127.0.0.1"
+        config['ssid'] = wificheck['ssid']
+        config['ip'] = wificheck['ip']
         res = False
 
     return res
@@ -275,9 +277,6 @@ def connect():
         subprocess.run("sudo /home/pi/devs/FlaskServer/clearDB.sh", shell=True, check=True)
 
         time.sleep(3)
-
-        
-
 
         found = [x for x in getSSID.main() if ssid in x['Name']]
 
@@ -340,8 +339,6 @@ def connect():
         # At the end, connect to the network
         set_new_network_wpa(ssid=ssid, password=passwd)
 
-        
-
         time.sleep(3)
 
         # Wait for the connection
@@ -353,16 +350,6 @@ def connect():
         config['ssid'] = ssid
         config['pass'] = passwd
         config['apsta'] = apsta
-
-        # Take the ids of every connected device in order to check for time scheduling
-        chronos = []
-        for x in ssids:
-            temp = {}
-            temp = chrono_elem.copy()
-            if (str(temp['id']) == str(x['Name'])):
-                pass
-            else:
-                chronos.append(temp)
 
         config['chonos'] = chronos
 
@@ -526,7 +513,7 @@ def on_message(mqtt_client, obj, msg):
         conn.close()
         mqtt_client.publish("local/" + str(msg.topic), (msg.payload).decode('utf-8'), retain=False)
     
-    shadow['state']['reported'] = esps
+    shadow['state']['reported']['esps'] = esps
     config['esps'] = esps
     if wificheck['online']:
         upload_config(config)
