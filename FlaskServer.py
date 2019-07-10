@@ -168,6 +168,9 @@ if(path.exists('/home/pi/devs/FlaskServer/save.txt')):
             f.write('#denyinterfaces eth0\n')
             f.close()
             time.sleep(1.0)
+            bashCommand = "sudo wpa_cli -i wlan0 reconfigure"
+            process = subprocess.Popen(bashCommand.split(), stdout=subprocess.PIPE)
+            subprocess.run("sudo /home/pi/devs/FlaskServer/toSTA.sh", shell=True, check=True)
             # For debug
             # set_new_network_wpa("Giggino", "ciaone77")
     else:
