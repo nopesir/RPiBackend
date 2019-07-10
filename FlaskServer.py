@@ -261,9 +261,23 @@ def check_wifi():
     return res
 
 
+def ap_security_switch(t):
+    global apsta
+    global wificheck
+    while True:
+        if apsta:
+            if not wificheck['online']:
+                set_ap()
+                return
+        time.sleep(2)
+
+t = threading.Timer(2.0, ap_security_switch)
+
+
 @application.route("/connect", methods=['GET'])
 def connect():
     global ssids
+    global t
     global chronos
     if("localhost" in str(request.host)):
 
@@ -366,6 +380,10 @@ def connect():
 
         # Start the scheduling thread
         runsched()
+        
+        check_wifi()
+        # Start standalone mode recovery thread
+        t.start()
 
         # Return the correctly connected devices as a vector of dict
         return resp
@@ -593,12 +611,15 @@ mqtt_client_aws.on_message = on_message_aws
 mqtt_client_aws.connect("localhost", 1882)
 mqtt_client_aws.loop_start()
 
-
 def get_mqtt():
     threading.Timer(5.0, get_mqtt).start()
     mqtt_client_aws.publish("local/rpi/wifi/get", json.dumps(wificheck), qos=1)
     mqtt_client_aws.publish("local/rpi/ssids/get", json.dumps(ssids), qos=1)
     mqtt_client_aws.publish("local/rpi/chrono/get", json.dumps(chronos), qos=1)
+
+
+
+
 
 def upload_config(config):
     global apsta
