@@ -89,9 +89,9 @@ ssids = []
 apsta = True
 
 # Clear all stored messages on MosquittoDB
-# subprocess.run("sudo /home/pi/devs/FlaskServer/clearDB.sh", shell=True, check=True)
+subprocess.run("sudo /home/pi/devs/FlaskServer/clearDB.sh", shell=True, check=True)
 
-# time.sleep(5)
+time.sleep(5)
 
 
 esps = dict()
@@ -396,14 +396,12 @@ def connect():
 
         # Transform the JSON into a string
         resp = json.dumps(ssids)
-
-        # Start the scheduling thread
-        runsched()
         
         check_wifi()
+
         # Start standalone mode recovery thread
         t.start()
-
+        print("Connect ended")
         # Return the correctly connected devices as a vector of dict
         return resp
     else:
