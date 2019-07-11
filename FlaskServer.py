@@ -19,10 +19,10 @@ import paho.mqtt.client as mqtt
 application = Flask(__name__)
         
 
-# To resolve CORS error on Angular
+# Enable CORS
 CORS(application)
 
-
+# Infos about WiFi
 wificheck = {
     'ssid': "ssid",
     'online': False,
@@ -30,6 +30,7 @@ wificheck = {
 }
 
 
+# Data to be sent to the ESPs with POST
 data = {
     'config': {
         'wifi': {
@@ -40,13 +41,14 @@ data = {
     }
 }
 
-
+# Shadow AWS to update the state
 shadow = {
     'state': {
         'reported': {}
     }
 }
 
+# Configuration initial values
 config = {
     'ssid': "ssid",
     'password': "pass",
@@ -54,9 +56,11 @@ config = {
     'apsta': True 
 }
 
+
+# List of enabled/disabled schedules
 chronos = []
 
-
+# Example element in the chronos list
 chrono_elem = {
     "id": "Mongoose_XXXXXX",
     "enabled": False,
@@ -75,19 +79,24 @@ chrono_elem = {
 }
 
 
+
 res = []
+
+# SSIDS retrieved of every Mongoose_XXXXXX
 ssids = []
+
+# State of the WiFi: True is STA, False is AP
 apsta = True
 
 # Clear all stored messages on MosquittoDB
-subprocess.run("sudo /home/pi/devs/FlaskServer/clearDB.sh", shell=True, check=True)
+# subprocess.run("sudo /home/pi/devs/FlaskServer/clearDB.sh", shell=True, check=True)
 
-time.sleep(5)
+# time.sleep(5)
 
 
 esps = dict()
 
-
+# Modify the WPA_SUPPLICANT file in order to have only one SSID enabled
 def set_new_network_wpa(ssid, password):
     with open('/etc/wpa_supplicant/wpa_supplicant.conf', 'w') as f:
         f.write('ctrl_interface=DIR=/var/run/wpa_supplicant GROUP=netdev\n')
@@ -109,6 +118,7 @@ def set_new_network_wpa(ssid, password):
         subprocess.run("sudo /home/pi/devs/FlaskServer/toSTA.sh", shell=True, check=True)
 
 
+# ENDPOINT to change from AP to STA mode
 @application.route("/tosta", methods=['GET'])
 def set_sta(sssssi='', passss=''):
     global apsta
@@ -143,7 +153,7 @@ def set_sta(sssssi='', passss=''):
     else:
         return jsonify({"result": "Already in STA"})
 
-
+# Check from the last shutdown if it was AP or STA and restore state
 if(path.exists('/home/pi/devs/FlaskServer/save.txt')):
     with open('/home/pi/devs/FlaskServer/save.txt', mode="r") as f:
         for line in f:
@@ -195,7 +205,7 @@ if(path.exists('/home/pi/devs/FlaskServer/save.txt')):
             subprocess.run("sudo /home/pi/devs/FlaskServer/toAP.sh", shell=True, check=True)
 
 
-
+# ENDPOINT to change from AP to STA mode
 @application.route("/toap", methods=['GET'])
 def set_ap():
     global apsta
@@ -229,10 +239,10 @@ def set_ap():
     else:
         return jsonify({"result": "Already in AP"})
 
+
 # Take the local IP of the raspberry
 # in order to send it to the Mongoose_XXXXXX
-
-
+# and have it in the configuration
 def retrieve_ip():
     return ([l for l in ([ip for ip in socket.gethostbyname_ex(socket.gethostname())[2] if not ip.startswith("127.")][:1], [[(s.connect(('8.8.8.8', 53)),s.getsockname()[0], s.close()) for s in [socket.socket(socket.AF_INET, socket.SOCK_DGRAM)]][0][1]]) if l][0][0])
 
@@ -241,6 +251,7 @@ def retrieve_ip():
 def check_wifi():
     global config
     global wificheck
+    global apsta
     res = False
 
     try:
@@ -249,6 +260,7 @@ def check_wifi():
         wificheck['online'] = True
         wificheck['ssid'] = re.sub('\\n', '', out2.decode('utf-8'))
         wificheck['ip'] = retrieve_ip()
+        wificheck['apsta'] = apsta
         config['ssid'] = wificheck['ssid']
         config['ip'] = wificheck['ip']
         res = True
@@ -257,6 +269,7 @@ def check_wifi():
         wificheck['online'] = False
         wificheck['ssid'] = "none"
         wificheck['ip'] = "127.0.0.1"
+        wificheck['apsta'] = apsta
         config['ssid'] = wificheck['ssid']
         config['ip'] = wificheck['ip']
         res = False
@@ -264,6 +277,7 @@ def check_wifi():
     return res
 
 
+# Once \connect finishes and the device is in STA mode, checks if there are failures and switch automatically to AP mode
 def ap_security_switch():
     global apsta
     global wificheck
@@ -278,6 +292,7 @@ def ap_security_switch():
 t = threading.Timer(2.0, ap_security_switch)
 
 
+# ENDPOINT to connect the system, search for Mongoose_XXXXXX and configure them 
 @application.route("/connect", methods=['GET'])
 def connect():
     global ssids
@@ -394,6 +409,7 @@ def connect():
     else:
         return jsonify([])
 
+
 # Flask ENDPOINT:
 # GET to retrieve the status of the WiFi connection
 @application.route("/wificheck", methods=['GET'])
@@ -408,6 +424,7 @@ def take_ssids():
     return json.dumps(ssids)
 
 
+# ENDPOINT to retrieve graphs data
 @application.route("/graphs", methods=['GET'])
 def take_graph():
     global res
@@ -486,6 +503,7 @@ def chrono_set():
         return jsonify({"result": True})
     else:
         return jsonify(chronos)
+
 
 # MQTT callback after connection, here there are the subscribes
 def on_connect(mqtt_client, obj, flags, rc):
