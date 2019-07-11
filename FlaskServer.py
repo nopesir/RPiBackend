@@ -691,85 +691,86 @@ def download_config():
 # Thread that checks if some schedule is set into the 'chronos' object
 def runsched():
     # Restart this fuction after 30 seconds
-    threading.Timer(30.0, runsched).start()
+    while True:
 
     # Take the local hour and transform it as a string
-    now = datetime.datetime.now()
-    clock = str(now.hour) + ":" + str(now.minute)
+        now = datetime.datetime.now()
+        clock = str(now.hour) + ":" + str(now.minute)
 
-    # Fo every Mongoose_XXXXXX saved in the /connect
-    for x in chronos:
-        if x['enabled'] == False:
-            print(" * " + x['id'] + " chrono is disabled")
-        else:
-            print(" * " + x['id'] + " chrono is enabled")
-            if date.today().weekday() == 0:
-                if bool(x['days']['monday']) == True:
-                    if str(x['start']) == str(clock):
-                        print(" * Time to enable " + x['id'])
-                        mqtt_client.publish(str(x['id']) + "/event/onoff", "on", retain=True)
-                        mqtt_client.publish(str(x['id']) + "/event/setTemp", str(x['temp']), retain=True)
-                    if str(x['end']) == str(clock):
-                        print(" * Time to disable " + x['id'])
-                        mqtt_client.publish(x['id'] + "/event/onoff", "off", retain=True)
-            if date.today().weekday() == 1:
-                if bool(x['days']['tuesday']) == True:
-                    if str(x['start']) == str(clock):
-                        print(" * Time to enable " + x['id'])
-                        mqtt_client.publish(str(x['id']) + "/event/onoff", "on", retain=True)
-                        mqtt_client.publish(str(x['id']) + "/event/setTemp", str(x['temp']), retain=True)
-                    if str(x['end']) == str(clock):
-                        print(" * Time to disable " + x['id'])
-                        mqtt_client.publish(x['id'] + "/event/onoff", "off", retain=True)
-            if date.today().weekday() == 2:
-                if bool(x['days']['wednesday']) == True:
-                    if str(x['start']) == str(clock):
-                        print(" * Time to enable " + x['id'])
-                        mqtt_client.publish(str(x['id']) + "/event/onoff", "on", retain=True)
-                        mqtt_client.publish(str(x['id']) + "/event/setTemp", str(x['temp']), retain=True)
-                    if str(x['end']) == str(clock):
-                        print(" * Time to disable " + x['id'])
-                        mqtt_client.publish(x['id'] + "/event/onoff", "off", retain=True)
-            if date.today().weekday() == 3:
-                if bool(x['days']['thursday']) == True:
-                    if str(x['start']) == str(clock):
-                        print(" * Time to enable " + x['id'])
-                        mqtt_client.publish(str(x['id']) + "/event/onoff", "on", retain=True)
-                        mqtt_client.publish(str(x['id']) + "/event/setTemp", str(x['temp']), retain=True)
-                    if str(x['end']) == str(clock):
-                        print(" * Time to disable " + x['id'])
-                        mqtt_client.publish(x['id'] + "/event/onoff", "off", retain=True)
-            if date.today().weekday() == 4:
-                if bool(x['days']['friday']) == True:
-                    if str(x['start']) == str(clock):
-                        print(" * Time to enable " + x['id'])
-                        mqtt_client.publish(str(x['id']) + "/event/onoff", "on", retain=True)
-                        mqtt_client.publish(str(x['id']) + "/event/setTemp", str(x['temp']), retain=True)
-                    if str(x['end']) == str(clock):
-                        print(" * Time to disable " + x['id'])
-                        mqtt_client.publish(x['id'] + "/event/onoff", "off", retain=True)
-            if date.today().weekday() == 5:
-                if bool(x['days']['saturday']) == True:
-                    if str(x['start']) == str(clock):
-                        print(" * Time to enable " + x['id'])
-                        mqtt_client.publish(str(x['id']) + "/event/onoff", "on", retain=True)
-                        mqtt_client.publish(str(x['id']) + "/event/setTemp", str(x['temp']), retain=True)
-                    if str(x['end']) == str(clock):
-                        print(" * Time to disable " + x['id'])
-                        mqtt_client.publish(x['id'] + "/event/onoff", "off", retain=True)
-            if date.today().weekday() == 6:
-                if bool(x['days']['sunday']) == True:
-                    if str(x['start']) == str(clock):
-                        print(" * Time to enable " + x['id'])
-                        mqtt_client.publish(str(x['id']) + "/event/onoff", "on", retain=True)
-                        mqtt_client.publish(str(x['id']) + "/event/setTemp", str(x['temp']), retain=True)
-                    if str(x['end']) == str(clock):
-                        print(" * Time to disable " + x['id'])
-                        mqtt_client.publish(x['id'] + "/event/onoff", "off", retain=True)
+        # Fo every Mongoose_XXXXXX saved in the /connect
+        for x in chronos:
+            if x['enabled'] == False:
+                print(" * " + x['id'] + " chrono is disabled")
+            else:
+                print(" * " + x['id'] + " chrono is enabled")
+                if date.today().weekday() == 0:
+                    if bool(x['days']['monday']) == True:
+                        if str(x['start']) == str(clock):
+                            print(" * Time to enable " + x['id'])
+                            mqtt_client.publish(str(x['id']) + "/event/onoff", "on", retain=True)
+                            mqtt_client.publish(str(x['id']) + "/event/setTemp", str(x['temp']), retain=True)
+                        if str(x['end']) == str(clock):
+                            print(" * Time to disable " + x['id'])
+                            mqtt_client.publish(x['id'] + "/event/onoff", "off", retain=True)
+                if date.today().weekday() == 1:
+                    if bool(x['days']['tuesday']) == True:
+                        if str(x['start']) == str(clock):
+                            print(" * Time to enable " + x['id'])
+                            mqtt_client.publish(str(x['id']) + "/event/onoff", "on", retain=True)
+                            mqtt_client.publish(str(x['id']) + "/event/setTemp", str(x['temp']), retain=True)
+                        if str(x['end']) == str(clock):
+                            print(" * Time to disable " + x['id'])
+                            mqtt_client.publish(x['id'] + "/event/onoff", "off", retain=True)
+                if date.today().weekday() == 2:
+                    if bool(x['days']['wednesday']) == True:
+                        if str(x['start']) == str(clock):
+                            print(" * Time to enable " + x['id'])
+                            mqtt_client.publish(str(x['id']) + "/event/onoff", "on", retain=True)
+                            mqtt_client.publish(str(x['id']) + "/event/setTemp", str(x['temp']), retain=True)
+                        if str(x['end']) == str(clock):
+                            print(" * Time to disable " + x['id'])
+                            mqtt_client.publish(x['id'] + "/event/onoff", "off", retain=True)
+                if date.today().weekday() == 3:
+                    if bool(x['days']['thursday']) == True:
+                        if str(x['start']) == str(clock):
+                            print(" * Time to enable " + x['id'])
+                            mqtt_client.publish(str(x['id']) + "/event/onoff", "on", retain=True)
+                            mqtt_client.publish(str(x['id']) + "/event/setTemp", str(x['temp']), retain=True)
+                        if str(x['end']) == str(clock):
+                            print(" * Time to disable " + x['id'])
+                            mqtt_client.publish(x['id'] + "/event/onoff", "off", retain=True)
+                if date.today().weekday() == 4:
+                    if bool(x['days']['friday']) == True:
+                        if str(x['start']) == str(clock):
+                            print(" * Time to enable " + x['id'])
+                            mqtt_client.publish(str(x['id']) + "/event/onoff", "on", retain=True)
+                            mqtt_client.publish(str(x['id']) + "/event/setTemp", str(x['temp']), retain=True)
+                        if str(x['end']) == str(clock):
+                            print(" * Time to disable " + x['id'])
+                            mqtt_client.publish(x['id'] + "/event/onoff", "off", retain=True)
+                if date.today().weekday() == 5:
+                    if bool(x['days']['saturday']) == True:
+                        if str(x['start']) == str(clock):
+                            print(" * Time to enable " + x['id'])
+                            mqtt_client.publish(str(x['id']) + "/event/onoff", "on", retain=True)
+                            mqtt_client.publish(str(x['id']) + "/event/setTemp", str(x['temp']), retain=True)
+                        if str(x['end']) == str(clock):
+                            print(" * Time to disable " + x['id'])
+                            mqtt_client.publish(x['id'] + "/event/onoff", "off", retain=True)
+                if date.today().weekday() == 6:
+                    if bool(x['days']['sunday']) == True:
+                        if str(x['start']) == str(clock):
+                            print(" * Time to enable " + x['id'])
+                            mqtt_client.publish(str(x['id']) + "/event/onoff", "on", retain=True)
+                            mqtt_client.publish(str(x['id']) + "/event/setTemp", str(x['temp']), retain=True)
+                        if str(x['end']) == str(clock):
+                            print(" * Time to disable " + x['id'])
+                            mqtt_client.publish(x['id'] + "/event/onoff", "off", retain=True)
+        time.sleep(25)
 
 #get_mqtt()
-
-
+t_sched = threading.Timer(2.0, runsched)
+t_sched.start()
 def set_ap_recovery():
     global apsta
     if(apsta):
