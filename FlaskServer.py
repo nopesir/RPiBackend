@@ -695,6 +695,8 @@ def runsched():
         now = datetime.datetime.now()
         clock = str(now.hour) + ":" + str(now.minute)
 
+        print(clock)
+
         # Fo every Mongoose_XXXXXX saved in the /connect
         for x in chronos:
             if x['enabled'] == False:
