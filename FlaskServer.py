@@ -515,8 +515,10 @@ def on_connect(mqtt_client, obj, flags, rc):
 
 
 def on_disconnect(mqtt_client, obj, flags, rc):
+    print("client disconnected")
     time.sleep(10)
     mqtt_client.reconnect()
+    print("client reconnected")
 
 # MQTT callback for every message published on every subscribed topic
 def on_message(mqtt_client, obj, msg):
