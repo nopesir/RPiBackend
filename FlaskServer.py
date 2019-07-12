@@ -316,13 +316,15 @@ def connect():
         if not found:
             return jsonify(found)
 
+
+        time.sleep(4)
         # Connect to the network to retrieve the IP
         if(not apsta):
             set_sta_from_ap(ssid, passwd)
         else:
             set_new_network_wpa(ssid=ssid, password=passwd)
         
-        time.sleep(3)
+        time.sleep(5)
 
         strin = " * Checking wifi..."
         i = 0
