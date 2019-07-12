@@ -309,7 +309,7 @@ def connect():
         # Clear all stored messages on MosquittoDB
         subprocess.run("sudo /home/pi/devs/FlaskServer/clearDB.sh", shell=True, check=True)
 
-        time.sleep(3)
+        time.sleep(4)
 
         found = [x for x in getSSID.main() if ssid in x['Name']]
 
@@ -317,7 +317,7 @@ def connect():
             return jsonify(found)
 
 
-        time.sleep(4)
+        time.sleep(5)
         # Connect to the network to retrieve the IP
         if(not apsta):
             set_sta_from_ap(ssid, passwd)
