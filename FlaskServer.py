@@ -140,7 +140,7 @@ def set_sta(sssssi='', passss=''):
                 f.write('#denyinterfaces wlan0\n')
                 f.write('#denyinterfaces eth0\n')
                 f.close()
-                time.sleep(1.0)
+                time.sleep(2.0)
                 # For debug
                 set_new_network_wpa(sssssi, passss)
                 apsta = not apsta
@@ -306,6 +306,8 @@ def connect():
         # Delete shadow state on Amazon AWS
         mqtt_client.publish("local/things/RaspberryPi/shadow/delete", qos=1)
 
+        time.sleep(4)
+
         # Clear all stored messages on MosquittoDB
         subprocess.run("sudo /home/pi/devs/FlaskServer/clearDB.sh", shell=True, check=True)
 
@@ -324,7 +326,7 @@ def connect():
         else:
             set_new_network_wpa(ssid=ssid, password=passwd)
         
-        time.sleep(5)
+        time.sleep(10)
 
         strin = " * Checking wifi..."
         i = 0
@@ -356,6 +358,7 @@ def connect():
             set_new_network_wpa(ssid=x['Name'], password="Mongoose")
             strin = " * Checking wifi..."
 
+            time.sleep(1)
             # Wait for the connection
             while not check_wifi():
                 strin = strin + "."
@@ -367,7 +370,8 @@ def connect():
 
             # POST the data to Mongoose OS with IP, SSID, PASS
             r = requests.post('http://192.168.4.1/rpc/Config.Set', json=data)
-            time.sleep(5)
+
+            time.sleep(3)
             # POST the save and reboot command for Mongoose OS
             r2 = requests.post('http://192.168.4.1/rpc/Config.Save', json={'reboot': True})
 
@@ -398,11 +402,10 @@ def connect():
 
         # Transform the JSON into a string
         resp = json.dumps(ssids)
-        
-        check_wifi()
 
         # Start standalone mode recovery thread
         t.start()
+        
         print("Connect ended")
         # Return the correctly connected devices as a vector of dict
         return resp
