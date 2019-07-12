@@ -513,6 +513,11 @@ def on_connect(mqtt_client, obj, flags, rc):
     print(" * MQTT Subscribed!")
 
 
+
+def on_disconnect(mqtt_client, obj, flags, rc):
+    time.sleep(10)
+    mqtt_client.reconnect()
+
 # MQTT callback for every message published on every subscribed topic
 def on_message(mqtt_client, obj, msg):
     global esps
@@ -575,6 +580,7 @@ def on_message(mqtt_client, obj, msg):
 mqtt_client = mqtt.Client()
 mqtt_client.on_connect = on_connect
 mqtt_client.on_message = on_message
+mqtt_client.on_disconnect = on_disconnect
 mqtt_client.connect("localhost", 1884)
 mqtt_client.loop_start()
 
@@ -586,6 +592,10 @@ def on_connect_aws(mqtt_client_aws, obj, flags, rc):
     mqtt_client_aws.subscribe("local/+/event/setname", 1)
     mqtt_client_aws.subscribe("local/rpi/chrono/set", 1)
     print(" * MQTT from AWS Subscribed!")
+
+def on_disconnect_aws(mqtt_client_aws, obj, flags, rc):
+    time.sleep(10)
+    mqtt_client_aws.reconnect()
 
 
 def on_message_aws(mqtt_client_aws, obj, msg):
@@ -630,6 +640,7 @@ def on_message_aws(mqtt_client_aws, obj, msg):
 mqtt_client_aws = mqtt.Client()
 mqtt_client_aws.on_connect = on_connect_aws
 mqtt_client_aws.on_message = on_message_aws
+mqtt_client_aws.on_disconnect = on_disconnect_aws
 mqtt_client_aws.connect("localhost", 1882)
 mqtt_client_aws.loop_start()
 
