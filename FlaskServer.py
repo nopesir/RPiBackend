@@ -316,7 +316,7 @@ def connect():
         found = [x for x in getSSID.main() if ssid in x['Name']]
 
         if not found:
-            return jsonify(found)
+            return jsonify({"result": False, "message": "SSID not found"})
 
 
         time.sleep(5)
@@ -340,7 +340,7 @@ def connect():
             pass
 
         if i > 10:
-            return jsonify({"result": False})
+            return jsonify({"result": False, "message": "Invalid password"})
 
         print(" * Master SSID: " + ssid)
 
@@ -351,7 +351,7 @@ def connect():
         data['config']['wifi']['sta']['ssid'] = ssid
         data['config']['wifi']['sta']['pass'] = passwd
         data['config']['mqtt']['server'] = retrieve_ip()
-
+        
         # For each Mongoose_XXXXXX
         for x in ssids:
             # Connect to it
@@ -375,6 +375,9 @@ def connect():
             # POST the save and reboot command for Mongoose OS
             r2 = requests.post('http://192.168.4.1/rpc/Config.Save', json={'reboot': True})
 
+
+        if not ssids:
+            return jsonify({"result": False, "message": "Connected, no device was found"})
         # At the end, connect to the network
         set_new_network_wpa(ssid=ssid, password=passwd)
 
@@ -408,9 +411,9 @@ def connect():
 
         print("Connect ended")
         # Return the correctly connected devices as a vector of dict
-        return resp
+        return jsonify({"result": True, "message": ssids})
     else:
-        return jsonify([])
+        return jsonify({"result": False, "message": "Access denied, try from the RPi"})
 
 
 # Flask ENDPOINT:
@@ -619,8 +622,8 @@ def on_message_aws(mqtt_client_aws, obj, msg):
     elif(str(msg.topic[-7:]) == "setname"):
         mqtt_client_aws.publish(str(msg.topic[-29:]), (msg.payload).decode('utf-8'), retain=True)
     elif(str(msg.topic[-3:]) == "set"):
-        temp = chrono_elem
-        j_post = (msg.payload).decode('utf-8')
+        j_post = json.loads((msg.payload).decode('utf-8'))
+        print("json loaded from chrono/set")
         founds = []
         founds = [x for x in chronos if str(x['id']) in str(j_post['id'])]
         print(founds)
@@ -637,13 +640,12 @@ def on_message_aws(mqtt_client_aws, obj, msg):
                     chronos[n]['temp'] = j_post['temp']
         
         shadow['state']['reported']['chronos'] = chronos
+        
         config['chonos'] = chronos
         if wificheck['online']:
             upload_config(config)
         shadow['state']['reported']['wifi'] = wificheck
         mqtt_client.publish("local/things/RaspberryPi/shadow/update", json.dumps(shadow), qos=1)
-
-
 
 
 
