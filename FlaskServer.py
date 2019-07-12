@@ -405,7 +405,7 @@ def connect():
 
         # Start standalone mode recovery thread
         t.start()
-        
+
         print("Connect ended")
         # Return the correctly connected devices as a vector of dict
         return resp
@@ -558,6 +558,11 @@ def on_message(mqtt_client, obj, msg):
         if(flag):
             ssids.append({"Address": "30:AE:A4:75:25:B1", "Channel": "6", "Encryption": "WEP", "Name": str(msg.topic[:15]), "Quality": " 97 %", "Signal": "-42 dBm"})
 
+
+        for x in ssids:
+            if(str(x['Name']) == str(msg.topic[:15])):
+                x['state'] = json.loads(msg.payload)
+
         esps[str(msg.topic[:15])] = json.loads(msg.payload)
         ide = str(msg.topic[:15])
         temp = str(esps[str(msg.topic[:15])]['currTemp'])
@@ -569,7 +574,7 @@ def on_message(mqtt_client, obj, msg):
         conn.close()
         mqtt_client.publish("local/" + str(msg.topic), (msg.payload).decode('utf-8'), retain=False)
     
-    shadow['state']['reported']['esps'] = esps
+    shadow['state']['reported']['esps'] = ssids
     config['esps'] = esps
     if wificheck['online']:
         upload_config(config)
