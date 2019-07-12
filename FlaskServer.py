@@ -498,6 +498,7 @@ def chrono_set():
                     chronos[n]['start'] = str(j_post['start'])
                     chronos[n]['end'] = str(j_post['end'])
                     chronos[n]['temp'] = j_post['temp']
+                    chronos[n]['id'] = j_post['id']
         
         shadow['state']['reported']['chronos'] = chronos
         
@@ -558,7 +559,7 @@ def on_message(mqtt_client, obj, msg):
             if(str(x['Name']) == str(msg.topic[:15])):
                 flag = False
         
-        if(flag):
+        if flag:
             ssids.append({"Address": "30:AE:A4:75:25:B1", "Channel": "6", "Encryption": "WEP", "Name": str(msg.topic[:15]), "Quality": " 97 %", "Signal": "-42 dBm"})
 
 
@@ -622,7 +623,8 @@ def on_message_aws(mqtt_client_aws, obj, msg):
     elif(str(msg.topic[-7:]) == "setname"):
         mqtt_client_aws.publish(str(msg.topic[-29:]), (msg.payload).decode('utf-8'), retain=True)
     elif(str(msg.topic[-3:]) == "set"):
-        j_post = json.loads((msg.payload).decode('utf-8'))
+
+        j_post = json.loads(str((msg.payload).decode('utf-8')).replace("\\", ""))
         print("json loaded from chrono/set")
         founds = []
         founds = [x for x in chronos if str(x['id']) in str(j_post['id'])]
@@ -645,7 +647,8 @@ def on_message_aws(mqtt_client_aws, obj, msg):
         if wificheck['online']:
             upload_config(config)
         shadow['state']['reported']['wifi'] = wificheck
-        mqtt_client.publish("local/things/RaspberryPi/shadow/update", json.dumps(shadow), qos=1)
+    
+    mqtt_client.publish("local/things/RaspberryPi/shadow/update", json.dumps(shadow), qos=1)
 
 
 
@@ -655,15 +658,6 @@ mqtt_client_aws.on_message = on_message_aws
 mqtt_client_aws.on_disconnect = on_disconnect_aws
 mqtt_client_aws.connect("localhost", 1882)
 mqtt_client_aws.loop_start()
-
-def get_mqtt():
-    threading.Timer(5.0, get_mqtt).start()
-    mqtt_client_aws.publish("local/rpi/wifi/get", json.dumps(wificheck), qos=1)
-    mqtt_client_aws.publish("local/rpi/ssids/get", json.dumps(ssids), qos=1)
-    mqtt_client_aws.publish("local/rpi/chrono/get", json.dumps(chronos), qos=1)
-
-
-
 
 
 def upload_config(config):
@@ -793,7 +787,6 @@ def runsched():
                             mqtt_client.publish(x['id'] + "/event/onoff", "off", retain=True)
         time.sleep(25)
 
-#get_mqtt()
 t_sched = threading.Timer(2.0, runsched)
 t_sched.start()
 def set_ap_recovery():
