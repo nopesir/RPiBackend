@@ -616,7 +616,7 @@ def on_message(mqtt_client, obj, msg):
 
 
 # MQTT callbacks and configuration
-mqtt_client = mqtt.Client()
+mqtt_client = mqtt.Client(client_id="flaskClient")
 mqtt_client.on_connect = on_connect
 mqtt_client.on_message = on_message
 mqtt_client.on_disconnect = on_disconnect
@@ -677,7 +677,7 @@ def on_message_aws(mqtt_client_aws, obj, msg):
 
 
 
-mqtt_client_aws = mqtt.Client()
+mqtt_client_aws = mqtt.Client(client_id="flaskClientb")
 mqtt_client_aws.on_connect = on_connect_aws
 mqtt_client_aws.on_message = on_message_aws
 mqtt_client_aws.on_disconnect = on_disconnect_aws
