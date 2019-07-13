@@ -88,6 +88,9 @@ ssids = []
 # State of the WiFi: True is STA, False is AP
 apsta = True
 
+
+stop_threads = False
+
 # Clear all stored messages on MosquittoDB
 subprocess.run("sudo /home/pi/devs/FlaskServer/clearDB.sh", shell=True, check=True)
 
@@ -209,8 +212,10 @@ if(path.exists('/home/pi/devs/FlaskServer/save.txt')):
 @application.route("/toap", methods=['GET'])
 def set_ap():
     global apsta
+    global stop_threads
     if(apsta):
         if("localhost" in str(request.host)):
+            stop_threads = True
             with open('/etc/dhcpcd.conf', 'w') as f:
                 f.write('hostname\n\n')
                 f.write('clientid\n\n')
@@ -281,12 +286,15 @@ def check_wifi():
 def ap_security_switch():
     global apsta
     global wificheck
+    global stop_threads
     while True:
         if apsta:
             print(' * Checking WiFi...')
             if not wificheck['online']:
                 set_ap_recovery()
                 return
+        if stop_threads:
+            break
         time.sleep(2)
 
 t = threading.Timer(2.0, ap_security_switch)
@@ -298,8 +306,9 @@ def connect():
     global ssids
     global t
     global chronos
+    global stop_threads
     if("localhost" in str(request.host)):
-
+        stop_threads = True
         ssid = request.args.get('ssid')
         passwd = request.args.get('passwd')
 
@@ -402,8 +411,8 @@ def connect():
         config['chonos'] = chronos
 
         upload_config(config)
-        
 
+        stop_threads = False
         # Start standalone mode recovery thread
         t.start()
 
