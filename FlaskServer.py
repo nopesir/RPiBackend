@@ -561,8 +561,15 @@ def on_message(mqtt_client, obj, msg):
     if(str(msg.topic[-6:]) == "status"):
         if((msg.payload).decode('utf-8') == "online"):
             esps[str(msg.topic[:15])]['online'] = True
+            for n, i in enumerate(ssids):
+                if i['Name'] == str(msg.topic[:15]):
+                    ssids[n]['state']['online'] = True
         else:
             esps[str(msg.topic[:15])]['online'] = False
+            for n, i in enumerate(ssids):
+                if i['Name'] == str(msg.topic[:15]):
+                    ssids[n]['state']['online'] = False
+        
         mqtt_client.publish("local/" + str(msg.topic), (msg.payload).decode('utf-8'), retain=False)
     elif(str(msg.topic[-7:]) == "setTemp"):
         
