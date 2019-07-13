@@ -402,9 +402,7 @@ def connect():
         config['chonos'] = chronos
 
         upload_config(config)
-
-        # Transform the JSON into a string
-        resp = json.dumps(ssids)
+        
 
         # Start standalone mode recovery thread
         t.start()
@@ -712,7 +710,17 @@ def runsched():
 
     # Take the local hour and transform it as a string
         now = datetime.datetime.now()
-        clock = str(now.hour) + ":" + str(now.minute)
+        ore = now.hour
+        minuti = now.minute
+
+        if (ore < 10 and ore > 0):
+            ore = '0' + str(ore)
+        
+        if (minuti < 10 and minuti > 0):
+            minuti = '0' + str(minuti)
+
+        
+        clock = str(ore) + ":" + str(minuti)
 
         print(clock)
 
