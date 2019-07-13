@@ -328,23 +328,25 @@ def connect():
         # Clear all stored messages on MosquittoDB
         subprocess.run("sudo /home/pi/devs/FlaskServer/clearDB.sh", shell=True, check=True)
 
-        time.sleep(7)
+        time.sleep(4)
 
-        found = [x for x in getSSID.main() if ssid == x['Name']]
+        all_ssids = [x for x in getSSID.main()]
+
+        found = [x for x in all_ssids if ssid == x['Name']]
 
         if not found:
             stop_threads = True
             return jsonify({"result": False, "message": "SSID not found"})
 
 
-        time.sleep(5)
+        time.sleep(2)
         # Connect to the network to retrieve the IP
         if(not apsta):
             set_sta_from_ap(ssid, passwd)
         else:
             set_new_network_wpa(ssid=ssid, password=passwd)
         
-        time.sleep(6)
+        time.sleep(5)
 
         strin = " * Checking wifi..."
         i = 0
@@ -363,11 +365,11 @@ def connect():
 
         print(" * Master SSID: " + ssid)
 
-        time.sleep(5)
+        time.sleep(1)
 
         ssids = []
         # Search for networks and filter by SSIDs that starts with "Mongoose_"
-        ssids = [x for x in getSSID.main() if "Mongoose_" in x['Name']]
+        ssids = [x for x in all_ssids if "Mongoose_" in x['Name']]
 
         # Save the data to be sent to the ESPs
         data['config']['wifi']['sta']['ssid'] = ssid
@@ -380,7 +382,7 @@ def connect():
             set_new_network_wpa(ssid=x['Name'], password="Mongoose")
             strin = " * Checking wifi..."
 
-            time.sleep(4)
+            time.sleep(7)
             # Wait for the connection
             while not check_wifi():
                 strin = strin + "."
@@ -404,7 +406,7 @@ def connect():
         # At the end, connect to the network
         set_new_network_wpa(ssid=ssid, password=passwd)
 
-        time.sleep(4)
+        time.sleep(3)
 
         # Wait for the connection
         while not check_wifi():
