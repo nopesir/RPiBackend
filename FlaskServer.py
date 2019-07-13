@@ -309,6 +309,7 @@ def connect():
     global stop_threads
     if("localhost" in str(request.host)):
         stop_threads = True
+        t.join()
         ssid = request.args.get('ssid')
         passwd = request.args.get('passwd')
 
@@ -320,7 +321,7 @@ def connect():
         # Clear all stored messages on MosquittoDB
         subprocess.run("sudo /home/pi/devs/FlaskServer/clearDB.sh", shell=True, check=True)
 
-        time.sleep(4)
+        time.sleep(7)
 
         found = [x for x in getSSID.main() if ssid == x['Name']]
 
@@ -335,7 +336,7 @@ def connect():
         else:
             set_new_network_wpa(ssid=ssid, password=passwd)
         
-        time.sleep(10)
+        time.sleep(6)
 
         strin = " * Checking wifi..."
         i = 0
@@ -353,6 +354,8 @@ def connect():
 
         print(" * Master SSID: " + ssid)
 
+        time.sleep(5)
+
         ssids = []
         # Search for networks and filter by SSIDs that starts with "Mongoose_"
         ssids = [x for x in getSSID.main() if "Mongoose_" in x['Name']]
@@ -368,7 +371,7 @@ def connect():
             set_new_network_wpa(ssid=x['Name'], password="Mongoose")
             strin = " * Checking wifi..."
 
-            time.sleep(1)
+            time.sleep(4)
             # Wait for the connection
             while not check_wifi():
                 strin = strin + "."
@@ -381,7 +384,7 @@ def connect():
             # POST the data to Mongoose OS with IP, SSID, PASS
             r = requests.post('http://192.168.4.1/rpc/Config.Set', json=data)
 
-            time.sleep(3)
+            time.sleep(2)
             # POST the save and reboot command for Mongoose OS
             r2 = requests.post('http://192.168.4.1/rpc/Config.Save', json={'reboot': True})
 
@@ -391,7 +394,7 @@ def connect():
         # At the end, connect to the network
         set_new_network_wpa(ssid=ssid, password=passwd)
 
-        time.sleep(3)
+        time.sleep(4)
 
         # Wait for the connection
         while not check_wifi():

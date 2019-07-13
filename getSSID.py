@@ -1,7 +1,7 @@
 import sys
 import subprocess
 
-interface = "p2p-dev-wlan0"
+interface = "wlan0"
 
 # You can add or change the functions to parse the properties of each AP (cell)
 # below. They take one argument, the bunch of text describing one cell in iwlist
