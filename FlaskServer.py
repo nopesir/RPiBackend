@@ -333,6 +333,7 @@ def connect():
         found = [x for x in getSSID.main() if ssid == x['Name']]
 
         if not found:
+            stop_threads = True
             return jsonify({"result": False, "message": "SSID not found"})
 
 
@@ -357,6 +358,7 @@ def connect():
             pass
 
         if i > 10:
+            stop_threads = True
             return jsonify({"result": False, "message": "Invalid password"})
 
         print(" * Master SSID: " + ssid)
@@ -397,6 +399,7 @@ def connect():
 
 
         if not ssids:
+            stop_threads = True
             return jsonify({"result": False, "message": "Connected, no device was found"})
         # At the end, connect to the network
         set_new_network_wpa(ssid=ssid, password=passwd)
