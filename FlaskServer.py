@@ -308,8 +308,15 @@ def connect():
     global chronos
     global stop_threads
     if("localhost" in str(request.host)):
+        
         stop_threads = True
-        t.join()
+        
+        try:
+            t.join()
+        except e as RuntimeError:
+            print(e)
+        
+        
         ssid = request.args.get('ssid')
         passwd = request.args.get('passwd')
         chronos = []
