@@ -312,7 +312,7 @@ def connect():
         t.join()
         ssid = request.args.get('ssid')
         passwd = request.args.get('passwd')
-
+        chronos = []
         # Delete shadow state on Amazon AWS
         mqtt_client.publish("local/things/RaspberryPi/shadow/delete", qos=1)
 
@@ -431,7 +431,9 @@ def connect():
 # GET to retrieve the status of the WiFi connection
 @application.route("/wificheck", methods=['GET'])
 def ret_wifi_status():
-    check_wifi()
+    global stop_threads
+    if not stop_threads:
+        check_wifi()
     return jsonify(wificheck)
 
 # Flask ENDPOINT:
