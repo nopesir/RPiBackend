@@ -1,7 +1,7 @@
 import sys
 import subprocess
 
-interface = "wlan0"
+interface = "p2p-dev-wlan0"
 
 # You can add or change the functions to parse the properties of each AP (cell)
 # below. They take one argument, the bunch of text describing one cell in iwlist
@@ -122,7 +122,7 @@ def main():
     cells=[[]]
     parsed_cells=[]
 
-    proc = subprocess.Popen(["iwlist", interface, "scan"],stdout=subprocess.PIPE, universal_newlines=True)
+    proc = subprocess.Popen(["sudo", "iwlist", interface, "scan"],stdout=subprocess.PIPE, universal_newlines=True)
     out, err = proc.communicate()
 
     for line in out.split("\n"):
