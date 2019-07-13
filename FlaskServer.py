@@ -353,6 +353,7 @@ def connect():
 
         print(" * Master SSID: " + ssid)
 
+        ssids = []
         # Search for networks and filter by SSIDs that starts with "Mongoose_"
         ssids = [x for x in getSSID.main() if "Mongoose_" in x['Name']]
 
