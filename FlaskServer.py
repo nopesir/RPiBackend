@@ -322,7 +322,7 @@ def connect():
 
         time.sleep(4)
 
-        found = [x for x in getSSID.main() if ssid in x['Name']]
+        found = [x for x in getSSID.main() if ssid == x['Name']]
 
         if not found:
             return jsonify({"result": False, "message": "SSID not found"})
