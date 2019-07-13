@@ -313,7 +313,7 @@ def connect():
         
         try:
             t.join()
-        except e as RuntimeError:
+        except RuntimeError as e:
             print(e)
         
         
