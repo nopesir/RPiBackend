@@ -310,7 +310,7 @@ def ap_security_switch():
             break
         time.sleep(5)
 
-t = threading.Timer(2.0, ap_security_switch)
+t = threading.Thread(ap_security_switch)
 
 
 # ENDPOINT to connect the system, search for Mongoose_XXXXXX and configure them 
@@ -449,9 +449,6 @@ def connect():
 
             upload_config(config)
 
-            stop_threads = False
-            # Start standalone mode recovery thread
-            t.start()
 
         else:
             all_ssids = [x for x in getSSID.main()]
@@ -489,9 +486,14 @@ def connect():
 
             print(" * Master SSID: " + ssid)
 
-            stop_threads = False
-
+        stop_threads = False
+        
+        # Start standalone mode recovery thread
+        try:
             t.start()
+        except RuntimeError as id:
+            print(id)
+        
 
         print("Connect ended")
         # Return the correctly connected devices as a vector of dict
