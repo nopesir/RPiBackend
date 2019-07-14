@@ -332,6 +332,11 @@ def connect():
         
         ssid = request.args.get('ssid')
         passwd = request.args.get('passwd')
+        reset = request.args.get('reset')
+
+        print(type(reset))
+        print(reset)
+
         chronos = []
 
         with open('/home/pi/devs/FlaskServer/chrono.txt', mode="w") as outfile:
