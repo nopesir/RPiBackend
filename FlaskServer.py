@@ -598,6 +598,7 @@ def on_message(mqtt_client, obj, msg):
         for x in ssids:
             if(str(x['Name']) == str(msg.topic[:15])):
                 x['state'] = json.loads(msg.payload)
+                x['state']['online'] = True
 
         esps[str(msg.topic[:15])] = json.loads(msg.payload)
         ide = str(msg.topic[:15])
