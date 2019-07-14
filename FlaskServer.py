@@ -888,17 +888,18 @@ def set_sta_from_ap(sssssi='', passss=''):
                 f.write(str(apsta))
                 f.close()
 
+time.sleep(3)
 
 stop_threads = True
 if apsta:
     k = 0
     while not check_wifi():
         k+=1
-        time.sleep(1)
-        if k > 6:
+        time.sleep(2)
+        if k > 4:
             break
         pass
-    if k <= 6:
+    if k <= 4:
         try:
             t.start()
         except RuntimeError as r:
