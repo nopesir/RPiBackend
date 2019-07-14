@@ -289,13 +289,15 @@ def ap_security_switch():
     global stop_threads
     while True:
         if apsta:
-            print(' * Checking WiFi...')
+            print(' * Security checking..')
             if not wificheck['online']:
+                print(' * Security checking failed, setting AP...')
                 set_ap_recovery()
                 return
+            print(' * Security checking.. OK')
         if stop_threads:
             break
-        time.sleep(2)
+        time.sleep(3)
 
 t = threading.Timer(2.0, ap_security_switch)
 
