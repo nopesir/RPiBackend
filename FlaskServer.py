@@ -207,6 +207,12 @@ if(path.exists('/home/pi/devs/FlaskServer/save.txt')):
             time.sleep(1.0)
             subprocess.run("sudo /home/pi/devs/FlaskServer/toAP.sh", shell=True, check=True)
 
+if(path.exists('/home/pi/devs/FlaskServer/chrono.txt')):
+    with open('/home/pi/devs/FlaskServer/chrono.txt', mode="r") as f:
+        chronos = json.load(f)
+
+
+
 
 # ENDPOINT to change from AP to STA mode
 @application.route("/toap", methods=['GET'])
@@ -533,6 +539,9 @@ def chrono_set():
                     chronos[n]['id'] = j_post['id']
         
         shadow['state']['reported']['chronos'] = chronos
+
+        with open('/home/pi/devs/FlaskServer/chrono.txt', mode="w") as outfile:
+            json.dump(chronos, outfile)
         
         config['chonos'] = chronos
         if wificheck['online']:
@@ -683,6 +692,9 @@ def on_message_aws(mqtt_client_aws, obj, msg):
         
         shadow['state']['reported']['chronos'] = chronos
         
+        with open('/home/pi/devs/FlaskServer/chrono.txt', mode="w") as outfile:
+            json.dump(chronos, outfile)
+
         config['chonos'] = chronos
         if wificheck['online']:
             upload_config(config)
