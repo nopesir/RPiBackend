@@ -887,5 +887,16 @@ def set_sta_from_ap(sssssi='', passss=''):
                 f.close()
 
 
+stop_threads = True
+if apsta:
+    time.sleep(2)
+    if check_wifi():
+        try:
+            t.start()
+        except RuntimeError as r:
+            print(r)
+        
+stop_threads = False
+
 if __name__ == "__main__":
     application.run(host='0.0.0.0')
