@@ -333,6 +333,10 @@ def connect():
         ssid = request.args.get('ssid')
         passwd = request.args.get('passwd')
         chronos = []
+
+        with open('/home/pi/devs/FlaskServer/chrono.txt', mode="w") as outfile:
+            json.dump(chronos, outfile)
+
         # Delete shadow state on Amazon AWS
         mqtt_client.publish("local/things/RaspberryPi/shadow/delete", qos=1)
 
