@@ -264,7 +264,12 @@ def check_wifi():
         out2 = subprocess.check_output(["sudo", "iwgetid", "-r"])
         wificheck['online'] = True
         wificheck['ssid'] = re.sub('\\n', '', out2.decode('utf-8'))
-        wificheck['ip'] = retrieve_ip()
+        
+        try:
+            wificheck['ip'] = retrieve_ip()
+        except:
+            wificheck['ip'] = "127.0.0.1"
+
         wificheck['apsta'] = apsta
         config['ssid'] = wificheck['ssid']
         config['ip'] = wificheck['ip']
@@ -290,14 +295,14 @@ def ap_security_switch():
     while True:
         if apsta:
             print(' * Security checking..')
-            if not wificheck['online']:
+            if not check_wifi():
                 print(' * Security checking failed, setting AP...')
                 set_ap_recovery()
                 return
             print(' * Security checking.. OK')
         if stop_threads:
             break
-        time.sleep(3)
+        time.sleep(5)
 
 t = threading.Timer(2.0, ap_security_switch)
 
