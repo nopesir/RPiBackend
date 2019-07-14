@@ -92,9 +92,9 @@ apsta = True
 stop_threads = False
 
 # Clear all stored messages on MosquittoDB
-subprocess.run("sudo /home/pi/devs/FlaskServer/clearDB.sh", shell=True, check=True)
+# subprocess.run("sudo /home/pi/devs/FlaskServer/clearDB.sh", shell=True, check=True)
 
-time.sleep(5)
+time.sleep(1)
 
 
 esps = dict()
