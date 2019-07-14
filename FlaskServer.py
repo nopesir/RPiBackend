@@ -334,125 +334,164 @@ def connect():
         passwd = request.args.get('passwd')
         reset = request.args.get('reset')
 
-        print(type(reset))
-        print(reset)
+        if reset == "true":
 
-        chronos = []
+            chronos = []
 
-        with open('/home/pi/devs/FlaskServer/chrono.txt', mode="w") as outfile:
-            json.dump(chronos, outfile)
+            with open('/home/pi/devs/FlaskServer/chrono.txt', mode="w") as outfile:
+                json.dump(chronos, outfile)
 
-        # Delete shadow state on Amazon AWS
-        mqtt_client.publish("local/things/RaspberryPi/shadow/delete", qos=1)
+            # Delete shadow state on Amazon AWS
+            mqtt_client.publish("local/things/RaspberryPi/shadow/delete", qos=1)
 
-        time.sleep(4)
+            time.sleep(4)
 
-        # Clear all stored messages on MosquittoDB
-        subprocess.run("sudo /home/pi/devs/FlaskServer/clearDB.sh", shell=True, check=True)
+            # Clear all stored messages on MosquittoDB
+            subprocess.run("sudo /home/pi/devs/FlaskServer/clearDB.sh", shell=True, check=True)
 
-        time.sleep(4)
+            time.sleep(4)
 
-        all_ssids = [x for x in getSSID.main()]
+            all_ssids = [x for x in getSSID.main()]
 
-        found = [x for x in all_ssids if ssid == x['Name']]
+            found = [x for x in all_ssids if ssid == x['Name']]
 
-        if not found:
-            stop_threads = True
-            return jsonify({"result": False, "message": "SSID not found"})
+            if not found:
+                stop_threads = False
+                return jsonify({"result": False, "message": "SSID not found"})
 
 
-        time.sleep(2)
-        # Connect to the network to retrieve the IP
-        if(not apsta):
-            set_sta_from_ap(ssid, passwd)
-        else:
-            set_new_network_wpa(ssid=ssid, password=passwd)
-        
-        time.sleep(5)
-
-        strin = " * Checking wifi..."
-        i = 0
-        while not check_wifi():
-            i += 1
-            strin = strin + "."
             time.sleep(2)
-            print(strin + "\r")
-            if i > 10:
-                break
-            pass
+            # Connect to the network to retrieve the IP
+            if(not apsta):
+                set_sta_from_ap(ssid, passwd)
+            else:
+                set_new_network_wpa(ssid=ssid, password=passwd)
+            
+            time.sleep(5)
 
-        if i > 10:
-            stop_threads = True
-            return jsonify({"result": False, "message": "Invalid password"})
-
-        print(" * Master SSID: " + ssid)
-
-        time.sleep(1)
-
-        ssids = []
-        # Search for networks and filter by SSIDs that starts with "Mongoose_"
-        ssids = [x for x in all_ssids if "Mongoose_" in x['Name']]
-
-        # Save the data to be sent to the ESPs
-        data['config']['wifi']['sta']['ssid'] = ssid
-        data['config']['wifi']['sta']['pass'] = passwd
-        data['config']['mqtt']['server'] = retrieve_ip()
-        
-        # For each Mongoose_XXXXXX
-        for x in ssids:
-            # Connect to it
-            set_new_network_wpa(ssid=x['Name'], password="Mongoose")
             strin = " * Checking wifi..."
-
-            time.sleep(7)
-            # Wait for the connection
+            i = 0
             while not check_wifi():
+                i += 1
                 strin = strin + "."
                 time.sleep(2)
                 print(strin + "\r")
+                if i > 10:
+                    break
                 pass
 
-            print(" * Configuring " + x['Name'] + "...")
+            if i > 10:
+                stop_threads = False
+                return jsonify({"result": False, "message": "Invalid password"})
 
-            # POST the data to Mongoose OS with IP, SSID, PASS
-            r = requests.post('http://192.168.4.1/rpc/Config.Set', json=data)
+            print(" * Master SSID: " + ssid)
+
+            time.sleep(1)
+
+            ssids = []
+            # Search for networks and filter by SSIDs that starts with "Mongoose_"
+            ssids = [x for x in all_ssids if "Mongoose_" in x['Name']]
+
+            # Save the data to be sent to the ESPs
+            data['config']['wifi']['sta']['ssid'] = ssid
+            data['config']['wifi']['sta']['pass'] = passwd
+            data['config']['mqtt']['server'] = retrieve_ip()
+            
+            # For each Mongoose_XXXXXX
+            for x in ssids:
+                # Connect to it
+                set_new_network_wpa(ssid=x['Name'], password="Mongoose")
+                strin = " * Checking wifi..."
+
+                time.sleep(7)
+                # Wait for the connection
+                while not check_wifi():
+                    strin = strin + "."
+                    time.sleep(2)
+                    print(strin + "\r")
+                    pass
+
+                print(" * Configuring " + x['Name'] + "...")
+
+                # POST the data to Mongoose OS with IP, SSID, PASS
+                r = requests.post('http://192.168.4.1/rpc/Config.Set', json=data)
+
+                time.sleep(2)
+                # POST the save and reboot command for Mongoose OS
+                r2 = requests.post('http://192.168.4.1/rpc/Config.Save', json={'reboot': True})
+
+
+            if not ssids:
+                stop_threads = False
+                return jsonify({"result": False, "message": "Connected, no device was found"})
+            # At the end, connect to the network
+            set_new_network_wpa(ssid=ssid, password=passwd)
+
+            time.sleep(3)
+
+            # Wait for the connection
+            while not check_wifi():
+                time.sleep(2)
+                pass
+
+            print(" * Connected to " + ssid + " and ready!")
+            config['ssid'] = ssid
+            config['pass'] = passwd
+            config['apsta'] = apsta
+
+            #for x in ssids:
+            #    temp = chrono_elem.copy()
+            #    temp['id'] = x['Name']
+            #    chronos.append(temp)
+
+
+            config['chonos'] = chronos
+
+            upload_config(config)
+
+            stop_threads = False
+            # Start standalone mode recovery thread
+            t.start()
+
+        else:
+            all_ssids = [x for x in getSSID.main()]
+
+            found = [x for x in all_ssids if ssid == x['Name']]
+
+            if not found:
+                stop_threads = True
+                return jsonify({"result": False, "message": "SSID not found"})
+
 
             time.sleep(2)
-            # POST the save and reboot command for Mongoose OS
-            r2 = requests.post('http://192.168.4.1/rpc/Config.Save', json={'reboot': True})
+            # Connect to the network to retrieve the IP
+            if(not apsta):
+                set_sta_from_ap(ssid, passwd)
+            else:
+                set_new_network_wpa(ssid=ssid, password=passwd)
+            
+            time.sleep(5)
 
+            strin = " * Checking wifi..."
+            i = 0
+            while not check_wifi():
+                i += 1
+                strin = strin + "."
+                time.sleep(2)
+                print(strin + "\r")
+                if i > 10:
+                    break
+                pass
 
-        if not ssids:
-            stop_threads = True
-            return jsonify({"result": False, "message": "Connected, no device was found"})
-        # At the end, connect to the network
-        set_new_network_wpa(ssid=ssid, password=passwd)
+            if i > 10:
+                stop_threads = True
+                return jsonify({"result": False, "message": "Invalid password"})
 
-        time.sleep(3)
+            print(" * Master SSID: " + ssid)
 
-        # Wait for the connection
-        while not check_wifi():
-            time.sleep(2)
-            pass
+            stop_threads = False
 
-        print(" * Connected to " + ssid + " and ready!")
-        config['ssid'] = ssid
-        config['pass'] = passwd
-        config['apsta'] = apsta
-
-        #for x in ssids:
-        #    temp = chrono_elem.copy()
-        #    temp['id'] = x['Name']
-        #    chronos.append(temp)
-
-
-        config['chonos'] = chronos
-
-        upload_config(config)
-
-        stop_threads = False
-        # Start standalone mode recovery thread
-        t.start()
+            t.start()
 
         print("Connect ended")
         # Return the correctly connected devices as a vector of dict
