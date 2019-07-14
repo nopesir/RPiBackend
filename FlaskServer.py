@@ -891,13 +891,19 @@ def set_sta_from_ap(sssssi='', passss=''):
 
 stop_threads = True
 if apsta:
-    time.sleep(2)
-    if check_wifi():
+    k = 0
+    while not check_wifi():
+        k+=1
+        time.sleep(1)
+        if k > 6:
+            break
+        pass
+    if k <= 6:
         try:
             t.start()
         except RuntimeError as r:
             print(r)
-        
+
 stop_threads = False
 
 if __name__ == "__main__":
