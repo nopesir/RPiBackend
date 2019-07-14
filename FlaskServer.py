@@ -219,8 +219,15 @@ if(path.exists('/home/pi/devs/FlaskServer/chrono.txt')):
 def set_ap():
     global apsta
     global stop_threads
+    global t
+
     if(apsta):
         if("localhost" in str(request.host)):
+            stop_threads = True
+            try:
+                t.join()
+            except RuntimeError as re:
+                print(re)
             stop_threads = True
             with open('/etc/dhcpcd.conf', 'w') as f:
                 f.write('hostname\n\n')
