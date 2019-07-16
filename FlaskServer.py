@@ -228,7 +228,6 @@ def set_ap():
                 t.join()
             except RuntimeError as re:
                 print(re)
-            stop_threads = False
             with open('/etc/dhcpcd.conf', 'w') as f:
                 f.write('hostname\n\n')
                 f.write('clientid\n\n')
@@ -317,7 +316,7 @@ def ap_security_switch():
             break
         time.sleep(5)
 
-t = threading.Thread(target=ap_security_switch)
+t = threading.Timer(2.0,ap_security_switch)
 
 
 # ENDPOINT to connect the system, search for Mongoose_XXXXXX and configure them 
@@ -463,7 +462,7 @@ def connect():
             found = [x for x in all_ssids if ssid == x['Name']]
 
             if not found:
-                stop_threads = True
+                stop_threads = False
                 return jsonify({"result": False, "message": "SSID not found"})
 
 
@@ -488,7 +487,7 @@ def connect():
                 pass
 
             if i > 10:
-                stop_threads = True
+                stop_threads = False
                 return jsonify({"result": False, "message": "Invalid password"})
 
             print(" * Master SSID: " + ssid)
