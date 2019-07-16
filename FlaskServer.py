@@ -317,7 +317,7 @@ def ap_security_switch():
             break
         time.sleep(5)
 
-t = threading.Timer(2.0, ap_security_switch)
+t = threading.Thread(target=ap_security_switch)
 
 
 # ENDPOINT to connect the system, search for Mongoose_XXXXXX and configure them 
