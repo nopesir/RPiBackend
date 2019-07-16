@@ -495,6 +495,8 @@ def connect():
         stop_threads = False
         
         # Start standalone mode recovery thread
+        t = threading.Timer(0.5, ap_security_switch)
+
         try:
             t.start()
         except RuntimeError as id:
