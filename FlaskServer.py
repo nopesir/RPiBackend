@@ -228,6 +228,7 @@ def set_ap():
                 t.join()
             except RuntimeError as re:
                 print(re)
+            stop_threads = False
             with open('/etc/dhcpcd.conf', 'w') as f:
                 f.write('hostname\n\n')
                 f.write('clientid\n\n')
